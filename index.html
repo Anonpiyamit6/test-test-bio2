@@ -160,6 +160,11 @@
           </svg> เพิ่มข้อสอบ </button> <button onclick="showImportExcelModal()" class="bg-emerald-500 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg> นำเข้า Excel </button>
+          <!-- ปุ่มสร้างข้อสอบตัวอย่างแบบ Manual -->
+          <button onclick="confirmCreateDefaultQuestions()" class="bg-amber-500 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-amber-600 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            รีเซ็ตข้อสอบตัวอย่าง
+          </button>
         </div>
        </div>
        <div id="questions-list" class="space-y-4"><!-- Questions will be rendered here -->
@@ -339,16 +344,14 @@
       try {
         const snapshot = await db.collection('questions').orderBy('order').get();
         questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (questions.length === 0) {
-          await createDefaultQuestions();
-        }
+        // แก้ไข: เอาการสร้างข้อสอบอัตโนมัติออก ถ้าไม่มีข้อสอบก็คือไม่มี (Admin ต้องกด Import หรือสร้างเอง)
+        // if (questions.length === 0) { await createDefaultQuestions(); } 
       } catch (error) {
         console.error('Error loading questions:', error);
-        questions = generateDefaultQuestions();
       }
     }
 
-    // Generate default questions
+    // Generate default questions (ฟังก์ชันนี้ยังเก็บไว้เผื่อ Admin กดเรียกใช้ manual)
     function generateDefaultQuestions() {
       const topics = [
         { q: 'ระบบนิเวศคืออะไร', choices: ['ความสัมพันธ์ระหว่างสิ่งมีชีวิตกับสิ่งแวดล้อม', 'กลุ่มสิ่งมีชีวิต', 'สิ่งแวดล้อมทางกายภาพ', 'ห่วงโซ่อาหาร'], answer: 0 },
@@ -406,18 +409,48 @@
       const defaultQuestions = generateDefaultQuestions();
       const batch = db.batch();
       
+      // Clear existing first just in case
+      try {
+        const snapshot = await db.collection('questions').get();
+        snapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+      } catch (e) { console.log(e); }
+
+      const newBatch = db.batch();
       for (const q of defaultQuestions) {
         const docRef = db.collection('questions').doc(q.id);
-        batch.set(docRef, q);
+        newBatch.set(docRef, q);
       }
       
       try {
-        await batch.commit();
+        await newBatch.commit();
         questions = defaultQuestions;
       } catch (error) {
         console.error('Error creating default questions:', error);
         questions = defaultQuestions;
       }
+    }
+
+    // Confirm Create Defaults (ปุ่มใหม่สำหรับ Admin)
+    function confirmCreateDefaultQuestions() {
+        Swal.fire({
+            title: 'ยืนยันรีเซ็ตข้อสอบ?',
+            text: "ข้อสอบเก่าทั้งหมดจะถูกลบและแทนที่ด้วยข้อสอบตัวอย่าง 40 ข้อ",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยัน รีเซ็ตเลย'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({title: 'กำลังรีเซ็ต...', didOpen: () => Swal.showLoading()});
+                await createDefaultQuestions();
+                renderQuestionsAdmin();
+                Swal.fire('เรียบร้อย', 'รีเซ็ตข้อสอบเป็นตัวอย่างแล้ว', 'success');
+            }
+        });
     }
 
     // Registration form submit
@@ -1249,9 +1282,12 @@
       
       if (result.isConfirmed) {
         try {
-          await db.collection('questions').doc(id).delete();
-          await loadQuestions();
+          // ลบจากในเครื่องก่อน เพื่อความเร็ว
+          questions = questions.filter(q => q.id !== id);
           renderQuestionsAdmin();
+
+          await db.collection('questions').doc(id).delete();
+          
           Swal.fire({
             icon: 'success',
             title: 'ลบสำเร็จ',
