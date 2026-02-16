@@ -277,6 +277,7 @@
     let currentQuestionIndex = 0;
     let studentAnswers = {};
     let studentInfo = { name: '', number: '', classroom: '' };
+    let currentStudentDocId = null; // Store current student document ID for status updates
     let warningCount = 0;
     let examTimer = null;
     let examTimeLeft = 0;
@@ -437,18 +438,53 @@
       }
       
       studentInfo = { name, number, classroom };
-      
-      // Save student to Firebase
+
+      // เช็คว่าเคยสอบไปแล้วหรือยัง
       try {
-        await db.collection('students').doc(`${number}-${Date.now()}`).set({
-          name,
-          number,
-          classroom,
-          startTime: firebase.firestore.FieldValue.serverTimestamp(),
-          status: 'กำลังสอบ'
-        });
+        const checkQuery = await db.collection('students').where('number', '==', number).get();
+        if (!checkQuery.empty) {
+            // เจอข้อมูลเก่า
+            const existingDoc = checkQuery.docs[0];
+            const existingData = existingDoc.data();
+            
+            if (existingData.status === 'ส่งแล้ว' || existingData.status === 'ถูกยุติการสอบ') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถเข้าสอบได้',
+                    text: `สถานะของคุณคือ: ${existingData.status}`,
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            } else {
+                // ถ้าสถานะเป็น "กำลังสอบ" (เช่น เน็ตหลุด) ให้อัปเดตเวลาและเข้าสอบต่อได้
+                currentStudentDocId = existingDoc.id;
+                await db.collection('students').doc(currentStudentDocId).update({
+                    startTime: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'กำลังสอบ' // ยืนยันสถานะ
+                });
+            }
+        } else {
+            // ไม่เจอข้อมูลเก่า สร้างใหม่
+            const newDoc = await db.collection('students').add({
+                name,
+                number,
+                classroom,
+                startTime: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'กำลังสอบ'
+            });
+            currentStudentDocId = newDoc.id;
+        }
       } catch (error) {
-        console.error('Error saving student:', error);
+        console.error('Error checking/saving student:', error);
+        // Fallback กรณีมีปัญหา (เพื่อไม่ให้เด็กติด)
+         const newDoc = await db.collection('students').add({
+            name,
+            number,
+            classroom,
+            startTime: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'กำลังสอบ'
+        });
+        currentStudentDocId = newDoc.id;
       }
       
       await loadQuestions();
@@ -710,7 +746,20 @@
       const duration = Math.floor((endTime - examStartTime) / 1000);
       const durationStr = `${Math.floor(duration / 60)} นาที ${duration % 60} วินาที`;
       
-      // Save result to Firebase
+      const status = cheated ? 'ถูกยุติการสอบ' : 'ส่งแล้ว';
+
+      // Update Student Status in 'students' collection (Real-time status for Admin)
+      if (currentStudentDocId) {
+          try {
+              await db.collection('students').doc(currentStudentDocId).update({
+                  status: status
+              });
+          } catch (e) {
+              console.error('Error updating student status:', e);
+          }
+      }
+
+      // Save result to 'results' collection
       try {
         await db.collection('results').add({
           name: studentInfo.name,
@@ -723,7 +772,7 @@
           durationSeconds: duration,
           warnings: warningCount,
           cheated,
-          status: cheated ? 'ถูกยุติการสอบ' : 'ส่งแล้ว',
+          status: status,
           submittedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       } catch (error) {
@@ -1352,19 +1401,29 @@
       }
     }
 
-    // Render students
+    // Render students (Updated logic for status colors)
     function renderStudents(filteredStudents = null) {
       const students = filteredStudents || allStudents;
       const tbody = document.getElementById('students-tbody');
-      tbody.innerHTML = students.map((s, i) => `
+      tbody.innerHTML = students.map((s, i) => {
+        let statusClass = 'bg-amber-100 text-amber-700'; // Default: กำลังสอบ
+        let statusText = s.status || 'กำลังสอบ';
+
+        if (statusText === 'ส่งแล้ว') {
+            statusClass = 'bg-emerald-100 text-emerald-700';
+        } else if (statusText === 'ถูกยุติการสอบ') {
+            statusClass = 'bg-red-100 text-red-700';
+        }
+
+        return `
         <tr class="border-b border-gray-100 hover:bg-sky-50">
           <td class="px-4 py-3">${i + 1}</td>
           <td class="px-4 py-3 font-medium">${s.name}</td>
           <td class="px-4 py-3">${s.number}</td>
           <td class="px-4 py-3">${s.classroom || '-'}</td>
           <td class="px-4 py-3">
-            <span class="px-2 py-1 rounded-full text-xs ${s.status === 'กำลังสอบ' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
-              ${s.status || 'กำลังสอบ'}
+            <span class="px-2 py-1 rounded-full text-xs ${statusClass}">
+              ${statusText}
             </span>
           </td>
           <td class="px-4 py-3 flex gap-2">
@@ -1380,7 +1439,7 @@
             </button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
     }
 
     // Search students
