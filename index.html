@@ -285,6 +285,7 @@
     let timerSettings = { enabled: false, minutes: 60 };
     let allResults = [];
     let allStudents = [];
+    let isAway = false; // Flag to check if user is away
 
     // Initialize Element SDK
     if (window.elementSdk) {
@@ -587,37 +588,61 @@
     // Setup anti-cheat measures
     function setupAntiCheat() {
       // Visibility change detection
-      document.addEventListener('visibilitychange', handleCheatAttempt);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            onUserLeft();
+        } else {
+            onUserReturned();
+        }
+      });
       
       // Window blur detection
-      window.addEventListener('blur', handleCheatAttempt);
+      window.addEventListener('blur', onUserLeft);
+      window.addEventListener('focus', onUserReturned);
       
       // Prevent context menu
       document.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
-    let lastCheatTime = 0;
-    function handleCheatAttempt() {
-      // ป้องกันการแจ้งเตือนซ้ำซ้อนภายใน 1 วินาที (แก้ปัญหาเด้งทีเดียว 3 ครั้ง)
-      const now = Date.now();
-      if (now - lastCheatTime < 1000) return;
-      lastCheatTime = now;
-
-      // ถ้าไม่ได้อยู่ในหน้าสอบจริง ไม่ต้องนับ (เช่น แอดมิน หรือ หน้าผลสอบ)
+    function onUserLeft() {
+      // ถ้าไม่ได้อยู่ในหน้าสอบจริง ไม่ต้องนับ
       if (document.getElementById('exam-page').classList.contains('hidden')) return;
+      if (isAdmin) return;
+      
+      // ถ้าสถานะเป็น "ไม่อยู่" แล้ว ไม่ต้องนับเพิ่ม (ล็อคไว้)
+      if (isAway) return;
 
+      isAway = true; // ล็อคสถานะว่าไม่อยู่
       warningCount++;
       
       document.getElementById('warning-display').classList.remove('hidden');
       document.getElementById('warning-count').textContent = warningCount;
       
       if (warningCount >= 3) {
-        // Terminate exam
-        clearInterval(examTimer);
-        document.removeEventListener('visibilitychange', handleCheatAttempt);
-        window.removeEventListener('blur', handleCheatAttempt);
-        
+        terminateExam();
+      } else {
         Swal.fire({
+          icon: 'warning',
+          title: `คำเตือนครั้งที่ ${warningCount}`,
+          html: `ตรวจพบการออกนอกหน้าจอ<br>ห้ามพับหน้าจอ หรือเปิดแท็บอื่น`,
+          confirmButtonColor: '#f59e0b',
+          timer: 3000,
+          timerProgressBar: true
+        });
+      }
+    }
+
+    function onUserReturned() {
+        // เมื่อกลับเข้ามา ปลดล็อคให้นับครั้งต่อไปได้
+        isAway = false;
+    }
+
+    function terminateExam() {
+         clearInterval(examTimer);
+         window.removeEventListener('blur', onUserLeft);
+         window.removeEventListener('focus', onUserReturned);
+         
+         Swal.fire({
           icon: 'error',
           title: 'ยุติการสอบ',
           text: 'ตรวจพบการทุจริต 3 ครั้ง ระบบยุติการสอบทันที',
@@ -626,16 +651,6 @@
         }).then(() => {
           submitExamData(true);
         });
-      } else {
-        Swal.fire({
-          icon: 'warning',
-          title: `คำเตือนครั้งที่ ${warningCount}`,
-          html: `ตรวจพบพฤติกรรมต้องสงสัย (ออกจากหน้าจอ)<br>หากเกิดขึ้นอีก ${3 - warningCount} ครั้ง จะถูกยุติการสอบทันที`,
-          confirmButtonColor: '#f59e0b',
-          timer: 5000,
-          timerProgressBar: true
-        });
-      }
     }
 
     // Render question navigation
@@ -731,8 +746,8 @@
     // Submit exam data
     async function submitExamData(cheated = false) {
       clearInterval(examTimer);
-      document.removeEventListener('visibilitychange', handleCheatAttempt);
-      window.removeEventListener('blur', handleCheatAttempt);
+      window.removeEventListener('blur', onUserLeft);
+      window.removeEventListener('focus', onUserReturned);
       
       // Calculate score
       let score = 0;
