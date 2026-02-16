@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบข้อสอบปลายภาค ชีววิทยา 6</title>
   
-  <!-- CSS Framework & Utils -->
+  <!-- Libraries -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
   
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -22,18 +22,18 @@
     * { font-family: 'Sarabun', sans-serif; }
     .gradient-bg { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%); }
     .card-shadow { box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15); }
-    .btn-primary { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
-    .btn-primary:hover { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); }
+    .btn-primary { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); transform: translateY(-2px); shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
     .question-card { transition: all 0.3s ease; }
     .question-card:hover { transform: translateY(-2px); }
-    .tab-active { border-bottom: 3px solid #0ea5e9; color: #0ea5e9; }
-    @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .warning-pulse { animation: pulse-warning 1s infinite; }
-    .sidebar-item { transition: all 0.2s ease; }
+    .sidebar-item { transition: all 0.2s ease; cursor: pointer; }
     .sidebar-item:hover { background: rgba(14, 165, 233, 0.1); }
     .sidebar-item.active { background: rgba(14, 165, 233, 0.2); border-left: 4px solid #0ea5e9; }
-    /* Prevent selection */
+    /* Prevent selection for anti-cheat feel */
     .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    /* Animations */
+    @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .warning-pulse { animation: pulse-warning 1s infinite; }
   </style>
   <style>body { box-sizing: border-box; }</style>
  </head>
@@ -44,17 +44,17 @@
    <header class="bg-white/90 backdrop-blur-sm shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
      <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl flex items-center justify-center">
+      <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl flex items-center justify-center shadow-sm">
        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
       </div>
       <div>
-       <h1 id="header-title" class="text-lg md:text-xl font-bold text-sky-800">ระบบข้อสอบปลายภาค ชีววิทยา 6</h1>
+       <h1 id="header-title" class="text-lg md:text-xl font-bold text-sky-800">ระบบข้อสอบปลายภาค วิชา ชีววิทยา 6</h1>
        <p class="text-xs text-sky-600">พัฒนาโดย ว่าที่ร้อยตรีอานนท์ เมืองแก้ว @2025</p>
       </div>
      </div>
      <div class="flex items-center gap-3">
-      <div id="timer-display" class="hidden bg-sky-100 px-4 py-2 rounded-lg"><span class="text-sky-800 font-semibold" id="timer-text">00:00:00</span></div>
-      <button type="button" onclick="showAdminLogin()" class="p-2 hover:bg-sky-100 rounded-full transition-colors cursor-pointer">
+      <div id="timer-display" class="hidden bg-sky-100 px-4 py-2 rounded-lg shadow-inner"><span class="text-sky-800 font-semibold" id="timer-text">00:00:00</span></div>
+      <button onclick="showAdminLogin()" class="p-2 hover:bg-sky-100 rounded-full transition-colors duration-200">
        <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
       </button>
      </div>
@@ -63,28 +63,29 @@
 
    <!-- Student Registration Page -->
    <div id="registration-page" class="max-w-lg mx-auto px-4 py-8">
-    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8">
+    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 transform transition-all hover:scale-[1.01]">
      <div class="text-center mb-6">
-      <div class="w-20 h-20 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div class="w-20 h-20 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
       </div>
       <h2 class="text-2xl font-bold text-sky-800">ลงทะเบียนสอบ</h2>
-      <p class="text-sky-600 mt-1">หัวข้อ: อนุกรมวิธาน ไอโบม ประชากร</p>
+      <p id="exam-topic-display" class="text-sky-600 mt-1">หัวข้อ: อนุกรมวิธาน ไบโอม และประชากร</p>
      </div>
      <form id="registration-form" class="space-y-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-สกุล</label> <input type="text" id="student-name" required class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all" placeholder="กรอกชื่อ-สกุล"></div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">เลขที่</label> <input type="number" id="student-number" required min="1" class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all" placeholder="กรอกเลขที่"></div>
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-สกุล</label> <input type="text" id="student-name" required class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all shadow-sm" placeholder="กรอกชื่อ-สกุล"></div>
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">เลขที่</label> <input type="number" id="student-number" required min="1" class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all shadow-sm" placeholder="กรอกเลขที่"></div>
       <div><label class="block text-sm font-medium text-gray-700 mb-1">ห้อง</label> 
-        <select id="student-classroom" required class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all"> 
+        <select id="student-classroom" required class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent outline-none transition-all shadow-sm"> 
             <option value="">เลือกห้อง</option> <option value="ม.6/6">ม.6/6</option> <option value="ม.6/7">ม.6/7</option> <option value="ม.6/8">ม.6/8</option> <option value="ม.6/9">ม.6/9</option> <option value="ม.6/10">ม.6/10</option> <option value="ม.6/11">ม.6/11</option> 
         </select>
       </div>
-      <button type="submit" class="w-full btn-primary text-white font-semibold py-3 rounded-xl transition-all hover:shadow-lg cursor-pointer"> เริ่มทำข้อสอบ </button>
+      <button type="submit" class="w-full btn-primary text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl mt-4"> เริ่มทำข้อสอบ </button>
      </form>
-     <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
-      <h4 class="font-semibold text-amber-800 flex items-center gap-2">⚠️ ข้อควรระวัง</h4>
+     <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
+      <h4 class="font-semibold text-amber-800 flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> ข้อควรระวัง</h4>
       <ul class="text-sm text-amber-700 mt-2 space-y-1">
-       <li>• ห้ามพับหน้าจอ หรือเปิดหน้าต่างอื่น</li>
+       <li>• ห้ามย่อหน้าจอ พับหน้าจอ หรือเปิดหน้าต่างอื่น</li>
        <li>• ห้ามแคปหน้าจอ (Print Screen)</li>
        <li>• หากทุจริตครบ 3 ครั้ง จะถูกยุติการสอบทันที</li>
       </ul>
@@ -98,33 +99,37 @@
      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
       <div>
        <h3 class="text-lg font-bold text-sky-800" id="student-info-display"></h3>
-       <p class="text-sky-600 text-sm">ข้อสอบ: <span id="current-question-num">1</span>/40</p>
+       <p class="text-sky-600 text-sm">ข้อสอบ: <span id="current-question-num">1</span>/<span id="total-questions-display">40</span></p>
       </div>
-      <div id="warning-display" class="hidden bg-red-100 px-4 py-2 rounded-lg warning-pulse"><span class="text-red-600 font-semibold">⚠️ คำเตือน: <span id="warning-count">0</span>/3</span></div>
+      <div id="warning-display" class="hidden bg-red-100 px-4 py-2 rounded-lg warning-pulse shadow-sm border border-red-200"><span class="text-red-600 font-semibold">⚠️ คำเตือน: <span id="warning-count">0</span>/3</span></div>
      </div>
-     <div class="flex flex-wrap gap-2 mb-4 p-3 bg-sky-50 rounded-xl max-h-32 overflow-y-auto">
-      <div id="question-nav"></div>
+     <div class="flex flex-wrap gap-2 mb-4 p-3 bg-sky-50 rounded-xl max-h-32 overflow-y-auto shadow-inner">
+      <div id="question-nav" class="flex flex-wrap gap-2"></div>
      </div>
     </div>
-    <div id="question-container" class="bg-white rounded-2xl card-shadow p-4 md:p-6"></div>
+    
+    <div id="question-container" class="bg-white rounded-2xl card-shadow p-4 md:p-6 mb-6"></div>
+    
     <div class="flex justify-between mt-4 gap-4">
-        <button type="button" onclick="prevQuestion()" class="flex-1 bg-white border-2 border-sky-400 text-sky-600 font-semibold py-3 rounded-xl hover:bg-sky-50 transition-all cursor-pointer"> ← ข้อก่อนหน้า </button> 
-        <button type="button" onclick="nextQuestion()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl transition-all hover:shadow-lg cursor-pointer"> ข้อถัดไป → </button>
+        <button onclick="prevQuestion()" class="flex-1 bg-white border-2 border-sky-400 text-sky-600 font-semibold py-3 rounded-xl hover:bg-sky-50 transition-all shadow-sm"> ← ข้อก่อนหน้า </button> 
+        <button onclick="nextQuestion()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"> ข้อถัดไป → </button>
     </div>
-    <button type="button" onclick="submitExam()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all cursor-pointer"> ส่งข้อสอบ </button>
+    <button onclick="submitExam()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all shadow-md"> ส่งข้อสอบ </button>
    </div>
 
    <!-- Result Page -->
    <div id="result-page" class="hidden max-w-lg mx-auto px-4 py-8">
-    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 text-center">
-     <div id="result-icon" class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"></div>
-     <h2 class="text-2xl font-bold text-gray-800 mb-2">ส่งข้อสอบเรียบร้อย!</h2>
-     <p id="result-name" class="text-gray-600 mb-4"></p>
-     <div class="bg-sky-50 rounded-xl p-6 mb-4">
-      <p class="text-4xl font-bold text-sky-600" id="result-score">0/40</p>
-      <p class="text-sky-800 mt-2">คะแนนที่ได้</p>
+    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 text-center transform transition-all">
+     <div id="result-icon" class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-bounce">
+      <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
      </div>
-     <p id="result-time" class="text-gray-500"></p>
+     <h2 class="text-2xl font-bold text-gray-800 mb-2">ส่งข้อสอบเรียบร้อย!</h2>
+     <p id="result-name" class="text-gray-600 mb-6"></p>
+     <div class="bg-sky-50 rounded-xl p-6 mb-6 border border-sky-100 shadow-inner">
+      <p class="text-5xl font-bold text-sky-600" id="result-score">0/0</p>
+      <p class="text-sky-800 mt-2 font-medium">คะแนนที่ได้</p>
+     </div>
+     <p id="result-time" class="text-gray-500 font-medium"></p>
     </div>
    </div>
 
@@ -132,43 +137,58 @@
    <div id="admin-page" class="hidden">
     <div class="flex h-full">
      <!-- Sidebar -->
-     <div class="w-64 bg-white shadow-lg fixed h-full overflow-y-auto hidden md:block">
-      <div class="p-4 border-b">
-       <h3 class="font-bold text-sky-800">แอดมินระบบ</h3>
+     <div class="w-64 bg-white shadow-xl fixed h-full overflow-y-auto hidden md:block z-20">
+      <div class="p-6 border-b bg-sky-50">
+       <h3 class="font-bold text-sky-800 text-lg">แอดมินระบบ</h3>
        <p id="admin-email-display" class="text-sm text-gray-500 truncate"></p>
       </div>
-      <nav class="p-2">
-        <button onclick="showAdminTab('questions')" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer" data-tab="questions">จัดการข้อสอบ</button> 
-        <button onclick="showAdminTab('results')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer" data-tab="results">ผลสอบ</button> 
-        <button onclick="showAdminTab('students')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer" data-tab="students">จัดการผู้สอบ</button> 
-        <button onclick="showAdminTab('settings')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer" data-tab="settings">ตั้งค่าเวลา</button>
+      <nav class="p-4 space-y-2">
+        <button onclick="showAdminTab('questions')" class="sidebar-item active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 font-medium" data-tab="questions">
+            <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            จัดการข้อสอบ
+        </button> 
+        <button onclick="showAdminTab('results')" class="sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 font-medium" data-tab="results">
+            <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            ผลสอบ
+        </button> 
+        <button onclick="showAdminTab('students')" class="sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 font-medium" data-tab="students">
+            <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            จัดการผู้สอบ
+        </button> 
+        <button onclick="showAdminTab('settings')" class="sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 font-medium" data-tab="settings">
+            <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            ตั้งค่าเวลา
+        </button>
        <div class="border-t mt-4 pt-4">
-         <button onclick="adminLogout()" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-red-600 cursor-pointer">ออกจากระบบ</button>
+         <button onclick="adminLogout()" class="sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-red-600 hover:bg-red-50 font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            ออกจากระบบ
+         </button>
        </div>
       </nav>
      </div>
      
      <!-- Mobile Menu -->
-     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50 border-t">
+     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 border-t">
       <div class="flex justify-around py-2">
-        <button onclick="showAdminTab('questions')" class="flex flex-col items-center p-2 text-sky-600" data-tab-mobile="questions"><span class="text-xs">ข้อสอบ</span></button> 
-        <button onclick="showAdminTab('results')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="results"><span class="text-xs">ผลสอบ</span></button> 
-        <button onclick="showAdminTab('students')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="students"><span class="text-xs">ผู้สอบ</span></button> 
-        <button onclick="showAdminTab('settings')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="settings"><span class="text-xs">เวลา</span></button> 
-        <button onclick="adminLogout()" class="flex flex-col items-center p-2 text-red-500"><span class="text-xs">ออก</span></button>
+        <button onclick="showAdminTab('questions')" class="flex flex-col items-center p-2 text-sky-600" data-tab-mobile="questions"><span class="text-xs font-medium">ข้อสอบ</span></button> 
+        <button onclick="showAdminTab('results')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="results"><span class="text-xs font-medium">ผลสอบ</span></button> 
+        <button onclick="showAdminTab('students')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="students"><span class="text-xs font-medium">ผู้สอบ</span></button> 
+        <button onclick="showAdminTab('settings')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="settings"><span class="text-xs font-medium">เวลา</span></button> 
+        <button onclick="adminLogout()" class="flex flex-col items-center p-2 text-red-500"><span class="text-xs font-medium">ออก</span></button>
       </div>
      </div>
 
      <!-- Main Content -->
-     <div class="flex-1 md:ml-64 p-4 md:p-6 pb-24 md:pb-6">
+     <div class="flex-1 md:ml-64 p-4 md:p-8 pb-24 md:pb-8">
       <!-- Questions Tab -->
       <div id="admin-questions" class="admin-content">
        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
         <h2 class="text-2xl font-bold text-sky-800">จัดการข้อสอบ</h2>
         <div class="flex gap-2 flex-wrap">
-            <button onclick="showAddQuestionModal()" class="btn-primary text-white px-6 py-2 rounded-xl flex items-center gap-2 cursor-pointer">เพิ่มข้อสอบ</button> 
-            <button onclick="showImportExcelModal()" class="bg-emerald-500 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all cursor-pointer">นำเข้า Excel</button>
-            <button onclick="confirmCreateDefaultQuestions()" class="bg-amber-500 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-amber-600 transition-all cursor-pointer">รีเซ็ตข้อสอบตัวอย่าง</button>
+            <button onclick="showAddQuestionModal()" class="btn-primary text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>เพิ่มข้อสอบ</button> 
+            <button onclick="showImportExcelModal()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>นำเข้า Excel</button>
+            <button onclick="confirmCreateDefaultQuestions()" class="bg-amber-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-amber-600 transition-all shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>รีเซ็ตข้อสอบ</button>
         </div>
        </div>
        <div id="questions-list" class="space-y-4"></div>
@@ -179,27 +199,27 @@
        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
         <h2 class="text-2xl font-bold text-sky-800">ผลการสอบ</h2>
         <div class="flex gap-2">
-            <button onclick="refreshResults()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all cursor-pointer">รีเฟรช</button> 
-            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all cursor-pointer">Export CSV</button>
+            <button onclick="refreshResults()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all border border-sky-200">รีเฟรช</button> 
+            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-sm">Export CSV</button>
         </div>
        </div>
-       <div class="bg-white rounded-xl p-4 mb-4"><input type="text" id="search-results" oninput="searchResults()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none"></div>
-       <div id="results-list" class="bg-white rounded-xl overflow-hidden">
+       <div class="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"><input type="text" id="search-results" oninput="searchResults()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all"></div>
+       <div id="results-list" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
         <div class="overflow-x-auto">
          <table class="w-full">
-          <thead class="bg-sky-50">
+          <thead class="bg-sky-50 border-b border-sky-100">
            <tr>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ลำดับ</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ชื่อ-สกุล</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">เลขที่</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ห้อง</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">คะแนน</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">เวลา</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">สถานะ</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">จัดการ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ลำดับ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ชื่อ-สกุล</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เลขที่</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ห้อง</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">คะแนน</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เวลา</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">สถานะ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">จัดการ</th>
            </tr>
           </thead>
-          <tbody id="results-tbody"></tbody>
+          <tbody id="results-tbody" class="divide-y divide-gray-100"></tbody>
          </table>
         </div>
        </div>
@@ -209,23 +229,23 @@
       <div id="admin-students" class="admin-content hidden">
        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
         <h2 class="text-2xl font-bold text-sky-800">จัดการผู้สอบ</h2>
-        <button onclick="refreshStudents()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all cursor-pointer">รีเฟรช</button>
+        <button onclick="refreshStudents()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all border border-sky-200">รีเฟรช</button>
        </div>
-       <div class="bg-white rounded-xl p-4 mb-4"><input type="text" id="search-students" oninput="searchStudents()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none"></div>
-       <div id="students-list" class="bg-white rounded-xl overflow-hidden">
+       <div class="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"><input type="text" id="search-students" oninput="searchStudents()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all"></div>
+       <div id="students-list" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
         <div class="overflow-x-auto">
          <table class="w-full">
-          <thead class="bg-sky-50">
+          <thead class="bg-sky-50 border-b border-sky-100">
            <tr>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ลำดับ</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ชื่อ-สกุล</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">เลขที่</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">ห้อง</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">สถานะ</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-sky-800">จัดการ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ลำดับ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ชื่อ-สกุล</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เลขที่</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ห้อง</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">สถานะ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">จัดการ</th>
            </tr>
           </thead>
-          <tbody id="students-tbody"></tbody>
+          <tbody id="students-tbody" class="divide-y divide-gray-100"></tbody>
          </table>
         </div>
        </div>
@@ -234,11 +254,11 @@
       <!-- Settings Tab -->
       <div id="admin-settings" class="admin-content hidden">
        <h2 class="text-2xl font-bold text-sky-800 mb-6">ตั้งค่าเวลาสอบ</h2>
-       <div class="bg-white rounded-xl p-6 max-w-md">
+       <div class="bg-white rounded-xl p-6 max-w-md shadow-sm border border-gray-100">
         <div class="space-y-4">
-         <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลาสอบ (นาที)</label> <input type="number" id="exam-time" value="60" min="1" class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 outline-none"></div>
+         <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลาสอบ (นาที)</label> <input type="number" id="exam-time" value="60" min="1" class="w-full px-4 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 outline-none transition-all"></div>
          <div class="flex items-center gap-3"><input type="checkbox" id="enable-timer" class="w-5 h-5 text-sky-600 rounded"> <label for="enable-timer" class="text-gray-700">เปิดใช้งานจับเวลา</label></div>
-         <button onclick="saveTimerSettings()" class="w-full btn-primary text-white py-3 rounded-xl cursor-pointer"> บันทึกการตั้งค่า </button>
+         <button onclick="saveTimerSettings()" class="w-full btn-primary text-white py-3 rounded-xl shadow-md"> บันทึกการตั้งค่า </button>
         </div>
        </div>
       </div>
@@ -262,15 +282,15 @@
       measurementId: "G-VTGK8GY9DK"
     };
 
-    // Initialize Firebase safely
+    // Initialize Firebase
     let auth, db;
     try {
         firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
         db = firebase.firestore();
     } catch (e) {
-        console.error("Firebase Init Error:", e);
-        alert("ไม่สามารถเชื่อมต่อระบบได้ กรุณารีเฟรชหน้าเว็บ");
+        console.error("Firebase Error:", e);
+        Swal.fire("ข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error");
     }
 
     // --------------------------------------------------------
@@ -290,161 +310,114 @@
     let timerSettings = { enabled: false, minutes: 60 };
     let allResults = [];
     let allStudents = [];
-    let isAway = false; // Flag for anti-cheat
-    let lastCheatTime = 0; // Cooldown for anti-cheat
+    
+    // Anti-cheat Flags
+    let isAway = false;
+    let lastCheatTime = 0;
 
     // --------------------------------------------------------
-    // Main Initialization
-    // --------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-        // Prevent context menu globally (Basic anti-cheat)
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-    });
-
-    // --------------------------------------------------------
-    // Question Management
+    // Core Functions
     // --------------------------------------------------------
     async function loadQuestions() {
       try {
         const snapshot = await db.collection('questions').orderBy('order').get();
         questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      } catch (error) {
-        console.error('Error loading questions:', error);
-      }
+        if(questions.length > 0) document.getElementById('total-questions-display').textContent = questions.length;
+      } catch (error) { console.error('Error loading questions:', error); }
     }
 
     function generateDefaultQuestions() {
-      const topics = [
-        { q: 'ระบบนิเวศคืออะไร', choices: ['ความสัมพันธ์สิ่งมีชีวิตกับสิ่งแวดล้อม', 'กลุ่มสิ่งมีชีวิต', 'ป่าไม้', 'สัตว์ป่า'], answer: 0 },
-        { q: 'ผู้ผลิตในระบบนิเวศคือใคร', choices: ['พืช', 'สัตว์กินพืช', 'สัตว์กินเนื้อ', 'เห็ดรา'], answer: 0 },
-        { q: 'การสังเคราะห์แสงได้แก๊สอะไร', choices: ['ออกซิเจน', 'คาร์บอนไดออกไซด์', 'ไนโตรเจน', 'มีเทน'], answer: 0 }
-      ];
-      // Create 40 questions for default
-      let fullList = [];
-      for(let i=0; i<40; i++) {
-          if(i < topics.length) fullList.push(topics[i]);
-          else fullList.push({ q: `ข้อสอบตัวอย่างข้อที่ ${i+1}`, choices: ['ตัวเลือก 1', 'ตัวเลือก 2', 'ตัวเลือก 3', 'ตัวเลือก 4'], answer: 0 });
-      }
-      return fullList.map((t, i) => ({
-        id: `q${i + 1}`,
-        order: i + 1,
-        question: `${i + 1}. ${t.q}`,
-        choices: t.choices,
-        correctAnswer: t.answer
-      }));
+        const topics = [
+            { q: 'ระบบนิเวศคืออะไร', choices: ['ความสัมพันธ์สิ่งมีชีวิตกับสิ่งแวดล้อม', 'กลุ่มสิ่งมีชีวิต', 'ป่าไม้', 'สัตว์ป่า'], answer: 0 },
+            { q: 'ผู้ผลิตในระบบนิเวศคือใคร', choices: ['พืช', 'สัตว์กินพืช', 'สัตว์กินเนื้อ', 'เห็ดรา'], answer: 0 },
+            { q: 'การสังเคราะห์แสงได้แก๊สอะไร', choices: ['ออกซิเจน', 'คาร์บอนไดออกไซด์', 'ไนโตรเจน', 'มีเทน'], answer: 0 }
+        ];
+        let fullList = [];
+        for(let i=0; i<40; i++) {
+            if(i < topics.length) fullList.push(topics[i]);
+            else fullList.push({ q: `ข้อสอบตัวอย่างข้อที่ ${i+1}`, choices: ['ตัวเลือก 1', 'ตัวเลือก 2', 'ตัวเลือก 3', 'ตัวเลือก 4'], answer: 0 });
+        }
+        return fullList.map((t, i) => ({
+            id: `q${i + 1}`,
+            order: i + 1,
+            question: `${i + 1}. ${t.q}`,
+            choices: t.choices,
+            correctAnswer: t.answer
+        }));
     }
 
     async function createDefaultQuestions() {
-      const defaultQuestions = generateDefaultQuestions();
-      const batch = db.batch();
-      try {
-        const snapshot = await db.collection('questions').get();
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-      } catch(e) {}
+        const defaultQuestions = generateDefaultQuestions();
+        const batch = db.batch();
+        try {
+            const snapshot = await db.collection('questions').get();
+            snapshot.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        } catch(e) {}
 
-      const newBatch = db.batch();
-      defaultQuestions.forEach(q => {
-        const docRef = db.collection('questions').doc(q.id);
-        newBatch.set(docRef, q);
-      });
-      await newBatch.commit();
-      questions = defaultQuestions;
+        const newBatch = db.batch();
+        defaultQuestions.forEach(q => {
+            const docRef = db.collection('questions').doc(q.id);
+            newBatch.set(docRef, q);
+        });
+        await newBatch.commit();
+        questions = defaultQuestions;
     }
 
     // --------------------------------------------------------
-    // Student Logic
+    // Student Exam Flow
     // --------------------------------------------------------
     document.getElementById('registration-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('student-name').value.trim();
-      const number = document.getElementById('student-number').value.trim();
-      const classroom = document.getElementById('student-classroom').value.trim();
-      
-      if (!name || !number || !classroom) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-      
-      studentInfo = { name, number, classroom };
-      
-      try {
-        const checkQuery = await db.collection('students').where('number', '==', number).get();
-        if (!checkQuery.empty) {
-            const existingDoc = checkQuery.docs[0];
-            const data = existingDoc.data();
-            if (['ส่งแล้ว', 'ถูกยุติการสอบ'].includes(data.status)) {
-                return Swal.fire('ไม่สามารถสอบได้', `สถานะของคุณคือ: ${data.status}`, 'error');
+        e.preventDefault();
+        const name = document.getElementById('student-name').value.trim();
+        const number = document.getElementById('student-number').value.trim();
+        const classroom = document.getElementById('student-classroom').value.trim();
+        
+        if (!name || !number || !classroom) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        
+        studentInfo = { name, number, classroom };
+        
+        try {
+            const checkQuery = await db.collection('students').where('number', '==', number).get();
+            if (!checkQuery.empty) {
+                const existingDoc = checkQuery.docs[0];
+                const data = existingDoc.data();
+                if (['ส่งแล้ว', 'ถูกยุติการสอบ'].includes(data.status)) {
+                    return Swal.fire('ไม่สามารถสอบได้', `สถานะของคุณคือ: ${data.status}`, 'error');
+                }
+                currentStudentDocId = existingDoc.id;
+                await db.collection('students').doc(currentStudentDocId).update({ startTime: firebase.firestore.FieldValue.serverTimestamp(), status: 'กำลังสอบ' });
+            } else {
+                const doc = await db.collection('students').add({ ...studentInfo, startTime: firebase.firestore.FieldValue.serverTimestamp(), status: 'กำลังสอบ' });
+                currentStudentDocId = doc.id;
             }
-            currentStudentDocId = existingDoc.id;
-            await db.collection('students').doc(currentStudentDocId).update({ startTime: firebase.firestore.FieldValue.serverTimestamp(), status: 'กำลังสอบ' });
-        } else {
-            const doc = await db.collection('students').add({ ...studentInfo, startTime: firebase.firestore.FieldValue.serverTimestamp(), status: 'กำลังสอบ' });
-            currentStudentDocId = doc.id;
+            
+            await loadQuestions();
+            if(questions.length === 0) {
+                Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อสอบในระบบ กรุณาแจ้งผู้คุมสอบ', 'error');
+            } else {
+                startExam();
+            }
+        } catch (error) {
+            Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         }
-        await loadQuestions();
-        if(questions.length === 0) {
-            Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อสอบในระบบ กรุณาแจ้งผู้คุมสอบ', 'error');
-        } else {
-            startExam();
-        }
-      } catch (error) {
-        console.error(error);
-        Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
-      }
     });
 
     function startExam() {
-      document.getElementById('registration-page').classList.add('hidden');
-      document.getElementById('exam-page').classList.remove('hidden');
-      document.getElementById('timer-display').classList.remove('hidden');
-      document.getElementById('student-info-display').textContent = `${studentInfo.name} (เลขที่ ${studentInfo.number})`;
-      
-      examStartTime = Date.now();
-      loadTimerSettings();
-      setupAntiCheat();
-      renderQuestionNav();
-      renderQuestion();
+        document.getElementById('registration-page').classList.add('hidden');
+        document.getElementById('exam-page').classList.remove('hidden');
+        document.getElementById('timer-display').classList.remove('hidden');
+        document.getElementById('student-info-display').textContent = `${studentInfo.name} (เลขที่ ${studentInfo.number})`;
+        
+        examStartTime = Date.now();
+        loadTimerSettings();
+        setupAntiCheat();
+        renderQuestionNav();
+        renderQuestion();
     }
 
     // --------------------------------------------------------
-    // Timer Logic
-    // --------------------------------------------------------
-    async function loadTimerSettings() {
-      try {
-        const doc = await db.collection('settings').doc('timer').get();
-        if (doc.exists) timerSettings = doc.data();
-      } catch (e) {}
-      
-      if (timerSettings.enabled) {
-        examTimeLeft = timerSettings.minutes * 60;
-        updateTimerDisplay();
-        examTimer = setInterval(() => {
-            examTimeLeft--;
-            updateTimerDisplay();
-            if (examTimeLeft <= 0) { clearInterval(examTimer); autoSubmitExam(); }
-        }, 1000);
-      } else {
-        examTimer = setInterval(() => {
-            const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
-            const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
-            const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
-            const s = (elapsed % 60).toString().padStart(2, '0');
-            document.getElementById('timer-text').textContent = `${h}:${m}:${s}`;
-        }, 1000);
-      }
-    }
-
-    function updateTimerDisplay() {
-      const h = Math.floor(examTimeLeft / 3600).toString().padStart(2, '0');
-      const m = Math.floor((examTimeLeft % 3600) / 60).toString().padStart(2, '0');
-      const s = (examTimeLeft % 60).toString().padStart(2, '0');
-      document.getElementById('timer-text').textContent = `${h}:${m}:${s}`;
-      if(examTimeLeft <= 300) {
-          document.getElementById('timer-display').classList.add('bg-red-100');
-          document.getElementById('timer-text').classList.add('text-red-600');
-      }
-    }
-
-    // --------------------------------------------------------
-    // Anti-Cheat System (Combined)
+    // Anti-Cheat (Combined & Debounced)
     // --------------------------------------------------------
     function setupAntiCheat() {
         // 1. Visibility (Tab switching/Minimizing)
@@ -461,14 +434,16 @@
         window.addEventListener('keyup', (e) => {
             if(e.key === 'PrintScreen' || e.keyCode === 44) triggerPenalty('ตรวจพบการแคปหน้าจอ');
         });
+        
+        // 4. Context Menu
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     function triggerPenalty(reason) {
         if(isAdmin || document.getElementById('exam-page').classList.contains('hidden')) return;
         
-        // Cooldown check (prevent double counting)
         const now = Date.now();
-        if(isAway || (now - lastCheatTime < 1000)) return;
+        if(isAway || (now - lastCheatTime < 1000)) return; // Cooldown 1s
         
         isAway = true;
         lastCheatTime = now;
@@ -483,7 +458,7 @@
             Swal.fire({
                 icon: 'warning',
                 title: `คำเตือนครั้งที่ ${warningCount}`,
-                html: `<b>${reason}</b><br>หากครบ 3 ครั้ง ระบบจะยุติการสอบทันที`,
+                html: `<b>${reason}</b><br>ห้ามพับหน้าจอ, เปิดแท็บอื่น หรือแคปหน้าจอ<br>หากครบ 3 ครั้ง จะถูกยุติการสอบทันที`,
                 timer: 4000,
                 timerProgressBar: true,
                 confirmButtonColor: '#f59e0b'
@@ -503,12 +478,51 @@
     }
 
     // --------------------------------------------------------
-    // Exam Navigation & Rendering
+    // Timer
+    // --------------------------------------------------------
+    async function loadTimerSettings() {
+        try {
+            const doc = await db.collection('settings').doc('timer').get();
+            if (doc.exists) timerSettings = doc.data();
+        } catch (e) {}
+        
+        if (timerSettings.enabled) {
+            examTimeLeft = timerSettings.minutes * 60;
+            updateTimerDisplay();
+            examTimer = setInterval(() => {
+                examTimeLeft--;
+                updateTimerDisplay();
+                if (examTimeLeft <= 0) { clearInterval(examTimer); autoSubmitExam(); }
+            }, 1000);
+        } else {
+            examTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
+                const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+                const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+                const s = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-text').textContent = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+    }
+
+    function updateTimerDisplay() {
+        const h = Math.floor(examTimeLeft / 3600).toString().padStart(2, '0');
+        const m = Math.floor((examTimeLeft % 3600) / 60).toString().padStart(2, '0');
+        const s = (examTimeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer-text').textContent = `${h}:${m}:${s}`;
+        if(examTimeLeft <= 300) {
+            document.getElementById('timer-display').classList.add('bg-red-100');
+            document.getElementById('timer-text').classList.add('text-red-600');
+        }
+    }
+
+    // --------------------------------------------------------
+    // Render & Navigation
     // --------------------------------------------------------
     function renderQuestionNav() {
         const nav = document.getElementById('question-nav');
         nav.innerHTML = questions.map((q, i) => `
-            <button type="button" onclick="goToQuestion(${i})" class="w-8 h-8 rounded-lg text-sm font-medium transition-all ${i === currentQuestionIndex ? 'bg-sky-500 text-white' : studentAnswers[q.id] !== undefined ? 'bg-emerald-500 text-white' : 'bg-white border border-sky-200 text-sky-600'}">${i + 1}</button>
+            <button onclick="goToQuestion(${i})" class="w-8 h-8 rounded-lg text-sm font-medium transition-all ${i === currentQuestionIndex ? 'bg-sky-500 text-white shadow-md' : studentAnswers[q.id] !== undefined ? 'bg-emerald-500 text-white' : 'bg-white border border-sky-200 text-sky-600 hover:bg-sky-50'}">${i + 1}</button>
         `).join('');
     }
 
@@ -516,14 +530,15 @@
         const q = questions[currentQuestionIndex];
         if(!q) return;
         const container = document.getElementById('question-container');
+        // Choice 1, 2, 3, 4
         container.innerHTML = `
             <div class="question-card">
                 <h3 class="text-lg font-semibold text-gray-800 mb-6">${q.question}</h3>
                 <div class="space-y-3">
                     ${q.choices.map((c, i) => `
-                        <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${studentAnswers[q.id] === i ? 'border-sky-500 bg-sky-50' : 'border-gray-200 hover:border-sky-300'}">
-                            <input type="radio" name="answer" value="${i}" ${studentAnswers[q.id] === i ? 'checked' : ''} onchange="selectAnswer(${i})" class="w-5 h-5 text-sky-600">
-                            <span class="ml-3 text-gray-700">${i+1}. ${c}</span>
+                        <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${studentAnswers[q.id] === i ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-200' : 'border-gray-200 hover:border-sky-300'}">
+                            <input type="radio" name="answer" value="${i}" ${studentAnswers[q.id] === i ? 'checked' : ''} onchange="selectAnswer(${i})" class="w-5 h-5 text-sky-600 focus:ring-sky-500">
+                            <span class="ml-3 text-gray-700"><span class="font-bold mr-1">${i+1}.</span> ${c}</span>
                         </label>
                     `).join('')}
                 </div>
@@ -543,17 +558,19 @@
     function nextQuestion() { if(currentQuestionIndex < questions.length - 1) goToQuestion(currentQuestionIndex + 1); }
 
     function submitExam() {
+        const answered = Object.keys(studentAnswers).length;
         Swal.fire({
             title: 'ยืนยันส่งข้อสอบ?',
+            html: `ตอบแล้ว ${answered}/${questions.length} ข้อ`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'ส่งเลย',
+            confirmButtonText: 'ส่งข้อสอบ',
             confirmButtonColor: '#10b981'
         }).then((res) => { if(res.isConfirmed) submitExamData(); });
     }
 
     function autoSubmitExam() {
-        Swal.fire('หมดเวลาสอบ', 'ระบบกำลังส่งคำตอบ', 'warning').then(() => submitExamData());
+        Swal.fire('หมดเวลาสอบ', 'ระบบกำลังส่งคำตอบอัตโนมัติ', 'warning').then(() => submitExamData());
     }
 
     async function submitExamData(cheated = false) {
@@ -579,25 +596,25 @@
         
         if(cheated) {
             document.getElementById('result-icon').innerHTML = `<svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
-            document.getElementById('result-icon').className = 'w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4';
-        } else {
-            document.getElementById('result-icon').innerHTML = `<svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+            document.getElementById('result-icon').className = 'w-24 h-24 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg';
         }
         
-        document.getElementById('result-name').textContent = studentInfo.name;
+        document.getElementById('result-name').textContent = `${studentInfo.name} (${studentInfo.classroom})`;
         document.getElementById('result-score').textContent = `${score}/${questions.length}`;
         document.getElementById('result-time').textContent = `เวลาที่ใช้: ${durationStr}`;
     }
 
     // --------------------------------------------------------
-    // Admin Logic
+    // Admin Functions
     // --------------------------------------------------------
     function showAdminLogin() {
         if(isAdmin) return showAdminPage();
         Swal.fire({
-            title: 'Admin Login',
+            title: 'เข้าสู่ระบบแอดมิน',
             html: '<input id="swal-email" class="swal2-input" placeholder="Email"><input id="swal-pass" type="password" class="swal2-input" placeholder="Password">',
             showCancelButton: true,
+            confirmButtonText: 'เข้าสู่ระบบ',
+            confirmButtonColor: '#0ea5e9',
             preConfirm: () => ({ email: document.getElementById('swal-email').value, pass: document.getElementById('swal-pass').value })
         }).then(async (res) => {
             if(res.isConfirmed) {
@@ -606,7 +623,7 @@
                     currentUser = user.user;
                     isAdmin = true;
                     showAdminPage();
-                } catch(e) { Swal.fire('Error', e.message, 'error'); }
+                } catch(e) { Swal.fire('Error', 'รหัสผ่านไม่ถูกต้อง', 'error'); }
             }
         });
     }
@@ -628,49 +645,90 @@
     function showAdminTab(tab) {
         document.querySelectorAll('.admin-content').forEach(el => el.classList.add('hidden'));
         document.getElementById(`admin-${tab}`).classList.remove('hidden');
+        document.querySelectorAll('.sidebar-item').forEach(el => {
+            el.classList.remove('active');
+            if(el.dataset.tab === tab) el.classList.add('active');
+        });
+        document.querySelectorAll('[data-tab-mobile]').forEach(el => {
+            el.classList.remove('text-sky-600');
+            el.classList.add('text-gray-500');
+            if(el.dataset.tabMobile === tab) { el.classList.add('text-sky-600'); el.classList.remove('text-gray-500'); }
+        });
     }
 
     function renderQuestionsAdmin() {
         const container = document.getElementById('questions-list');
         container.innerHTML = questions.map(q => `
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between">
-                <div>
-                    <h4 class="font-bold">${q.question}</h4>
-                    <div class="text-sm text-gray-600 ml-4">
-                        ${q.choices.map((c, i) => `<div class="${i===q.correctAnswer ? 'text-green-600 font-bold' : ''}">${i+1}. ${c}</div>`).join('')}
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800">${q.question}</h4>
+                    <div class="mt-2 text-sm text-gray-600 ml-4 space-y-1">
+                        ${q.choices.map((c, i) => `<div class="${i===q.correctAnswer ? 'text-emerald-600 font-bold' : ''}">${i+1}. ${c}</div>`).join('')}
                     </div>
                 </div>
-                <div><button onclick="deleteQuestion('${q.id}')" class="text-red-500 p-2">ลบ</button></div>
+                <div class="flex gap-2">
+                    <button onclick="editQuestion('${q.id}')" class="p-2 bg-sky-100 text-sky-600 rounded-lg hover:bg-sky-200 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                    <button onclick="deleteQuestion('${q.id}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                </div>
             </div>
         `).join('');
     }
 
-    // Additional Admin Functions (Simplified for stability)
+    function confirmCreateDefaultQuestions() {
+        Swal.fire({
+            title: 'ยืนยันรีเซ็ต?',
+            text: "ข้อสอบเก่าจะถูกลบและแทนที่ด้วยข้อสอบตัวอย่าง 40 ข้อ",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'ยืนยัน'
+        }).then(async (res) => {
+            if(res.isConfirmed) {
+                Swal.fire({title:'กำลังดำเนินการ...', didOpen: () => Swal.showLoading()});
+                await createDefaultQuestions();
+                renderQuestionsAdmin();
+                Swal.fire('สำเร็จ', 'รีเซ็ตข้อสอบเรียบร้อย', 'success');
+            }
+        });
+    }
+
+    // Expose functions globally for HTML onclick
+    window.showAdminLogin = showAdminLogin;
+    window.showAdminTab = showAdminTab;
+    window.prevQuestion = prevQuestion;
+    window.nextQuestion = nextQuestion;
+    window.submitExam = submitExam;
+    window.selectAnswer = selectAnswer;
+    window.goToQuestion = goToQuestion;
     window.confirmCreateDefaultQuestions = confirmCreateDefaultQuestions;
-    window.showAddQuestionModal = showAddQuestionModal;
-    window.showImportExcelModal = showImportExcelModal;
     window.refreshResults = loadResults;
     window.exportCSV = exportCSV;
     window.refreshStudents = loadStudents;
     window.adminLogout = async () => { await auth.signOut(); location.reload(); };
     window.deleteQuestion = async (id) => {
-        if((await Swal.fire({title:'ยืนยันลบ?',icon:'warning',showCancelButton:true})).isConfirmed) {
+        if((await Swal.fire({title:'ยืนยันการลบ?',text:'ไม่สามารถกู้คืนได้',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444'})).isConfirmed) {
             await db.collection('questions').doc(id).delete();
-            await loadQuestions(); renderQuestionsAdmin();
+            // Manually update local array for speed
+            questions = questions.filter(q => q.id !== id);
+            renderQuestionsAdmin();
+            Swal.fire('ลบสำเร็จ', '', 'success');
         }
     };
 
-    // Helper functions for Question Modal & Import (Keep logic from previous code but simplified call)
-    function showAddQuestionModal() {
+    // Helper Modals (Add/Edit/Import)
+    window.showAddQuestionModal = () => {
         Swal.fire({
             title: 'เพิ่มข้อสอบ',
-            html: `<input id="nq" class="swal2-input" placeholder="คำถาม">
-                   <input id="c1" class="swal2-input" placeholder="ตัวเลือก 1">
-                   <input id="c2" class="swal2-input" placeholder="ตัวเลือก 2">
-                   <input id="c3" class="swal2-input" placeholder="ตัวเลือก 3">
-                   <input id="c4" class="swal2-input" placeholder="ตัวเลือก 4">
-                   <select id="ca" class="swal2-input"><option value="0">ตอบ 1</option><option value="1">ตอบ 2</option><option value="2">ตอบ 3</option><option value="3">ตอบ 4</option></select>`,
+            html: `<div class="text-left space-y-3">
+                   <input id="nq" class="w-full px-3 py-2 border rounded-lg" placeholder="คำถาม">
+                   <input id="c1" class="w-full px-3 py-2 border rounded-lg" placeholder="ตัวเลือก 1">
+                   <input id="c2" class="w-full px-3 py-2 border rounded-lg" placeholder="ตัวเลือก 2">
+                   <input id="c3" class="w-full px-3 py-2 border rounded-lg" placeholder="ตัวเลือก 3">
+                   <input id="c4" class="w-full px-3 py-2 border rounded-lg" placeholder="ตัวเลือก 4">
+                   <select id="ca" class="w-full px-3 py-2 border rounded-lg"><option value="0">ตอบ 1</option><option value="1">ตอบ 2</option><option value="2">ตอบ 3</option><option value="3">ตอบ 4</option></select></div>`,
             showCancelButton: true,
+            confirmButtonText: 'บันทึก',
+            confirmButtonColor: '#0ea5e9',
             preConfirm: () => ({ q: document.getElementById('nq').value, choices: [document.getElementById('c1').value, document.getElementById('c2').value, document.getElementById('c3').value, document.getElementById('c4').value], a: parseInt(document.getElementById('ca').value) })
         }).then(async (res) => {
             if(res.isConfirmed) {
@@ -678,12 +736,43 @@
                 loadAdminData();
             }
         });
-    }
+    };
 
-    function showImportExcelModal() {
+    window.editQuestion = (id) => {
+        const q = questions.find(x => x.id === id);
+        Swal.fire({
+            title: 'แก้ไขข้อสอบ',
+            html: `<div class="text-left space-y-3">
+                   <input id="nq" class="w-full px-3 py-2 border rounded-lg" value="${q.question.replace(/^\d+\.\s*/,'')}">
+                   <input id="c1" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[0]}">
+                   <input id="c2" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[1]}">
+                   <input id="c3" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[2]}">
+                   <input id="c4" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[3]}">
+                   <select id="ca" class="w-full px-3 py-2 border rounded-lg">
+                    <option value="0" ${q.correctAnswer==0?'selected':''}>1</option>
+                    <option value="1" ${q.correctAnswer==1?'selected':''}>2</option>
+                    <option value="2" ${q.correctAnswer==2?'selected':''}>3</option>
+                    <option value="3" ${q.correctAnswer==3?'selected':''}>4</option>
+                   </select></div>`,
+            showCancelButton: true,
+            confirmButtonText: 'บันทึก',
+            confirmButtonColor: '#0ea5e9',
+            preConfirm: () => ({ q: document.getElementById('nq').value, choices: [document.getElementById('c1').value, document.getElementById('c2').value, document.getElementById('c3').value, document.getElementById('c4').value], a: parseInt(document.getElementById('ca').value) })
+        }).then(async (res) => {
+            if(res.isConfirmed) {
+                await db.collection('questions').doc(id).update({ question: `${q.order}. ${res.value.q}`, choices: res.value.choices, correctAnswer: res.value.a });
+                loadAdminData();
+            }
+        });
+    };
+
+    window.showImportExcelModal = () => {
         Swal.fire({
             title: 'Import Excel',
-            html: '<input type="file" id="xls" accept=".xlsx" class="swal2-input">',
+            html: '<p class="text-sm text-gray-500 mb-2">A=คำถาม, B-E=ตัวเลือก, F=เฉลย(0-3)</p><input type="file" id="xls" accept=".xlsx" class="w-full border rounded-lg p-2">',
+            showCancelButton: true,
+            confirmButtonText: 'นำเข้า',
+            confirmButtonColor: '#0ea5e9',
             preConfirm: () => document.getElementById('xls').files[0]
         }).then((res) => {
             if(res.isConfirmed && res.value) {
@@ -691,55 +780,115 @@
                 reader.onload = async (e) => {
                     const wb = XLSX.read(e.target.result, {type:'binary'});
                     const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:'A'});
-                    const batch = db.batch();
-                    // Clear old
-                    questions.forEach(q => batch.delete(db.collection('questions').doc(q.id)));
-                    // Add new
-                    data.forEach((r, i) => {
-                        if(r.A && r.B && r.C && r.D && r.E && r.F !== undefined) {
-                            batch.set(db.collection('questions').doc(`q${i+1}`), { order: i+1, question: r.A, choices: [r.B, r.C, r.D, r.E], correctAnswer: parseInt(r.F) });
-                        }
-                    });
-                    await batch.commit();
-                    loadAdminData();
+                    if((await Swal.fire({title:'ยืนยัน?',text:'ข้อสอบเก่าจะถูกลบทั้งหมด',icon:'warning',showCancelButton:true})).isConfirmed) {
+                        const batch = db.batch();
+                        questions.forEach(q => batch.delete(db.collection('questions').doc(q.id)));
+                        const newBatch = db.batch();
+                        let idx = 1;
+                        data.forEach(r => {
+                            if(r.A && r.B && r.C && r.D && r.E && r.F!==undefined) {
+                                newBatch.set(db.collection('questions').doc(`q${idx}`), { order: idx++, question: r.A, choices: [r.B, r.C, r.D, r.E], correctAnswer: parseInt(r.F) });
+                            }
+                        });
+                        await batch.commit(); await newBatch.commit();
+                        loadAdminData();
+                        Swal.fire('สำเร็จ', `นำเข้า ${idx-1} ข้อ`, 'success');
+                    }
                 };
                 reader.readAsBinaryString(res.value);
             }
         });
-    }
+    };
 
-    // Results & Students Loading Logic (Simplified)
+    // Load Data
     async function loadResults() {
         const snap = await db.collection('results').orderBy('submittedAt', 'desc').get();
-        allResults = snap.docs.map(d => d.data());
-        document.getElementById('results-tbody').innerHTML = allResults.map((r, i) => `<tr><td class="p-2">${i+1}</td><td class="p-2">${r.name}</td><td class="p-2">${r.number}</td><td class="p-2">${r.classroom}</td><td class="p-2">${r.score}</td><td class="p-2">${r.duration}</td><td class="p-2">${r.status}</td><td class="p-2">-</td></tr>`).join('');
+        allResults = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        document.getElementById('results-tbody').innerHTML = allResults.map((r, i) => `
+            <tr class="hover:bg-sky-50">
+                <td class="px-4 py-3">${i+1}</td>
+                <td class="px-4 py-3 font-medium">${r.name}</td>
+                <td class="px-4 py-3">${r.number}</td>
+                <td class="px-4 py-3">${r.classroom}</td>
+                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td>
+                <td class="px-4 py-3 text-sm">${r.duration}</td>
+                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td>
+                <td class="px-4 py-3"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+            </tr>`).join('');
     }
 
     async function loadStudents() {
         const snap = await db.collection('students').orderBy('startTime', 'desc').get();
         allStudents = snap.docs.map(d => ({id: d.id, ...d.data()}));
         document.getElementById('students-tbody').innerHTML = allStudents.map((s, i) => {
-            let color = s.status === 'ส่งแล้ว' ? 'text-green-600' : s.status === 'ถูกยุติการสอบ' ? 'text-red-600' : 'text-yellow-600';
-            return `<tr><td class="p-2">${i+1}</td><td class="p-2">${s.name}</td><td class="p-2">${s.number}</td><td class="p-2">${s.classroom}</td><td class="p-2 font-bold ${color}">${s.status}</td><td class="p-2"><button onclick="deleteStudent('${s.id}')" class="text-red-500">ลบ</button></td></tr>`;
+            let color = 'bg-amber-100 text-amber-700';
+            if(s.status === 'ส่งแล้ว') color = 'bg-emerald-100 text-emerald-700';
+            if(s.status === 'ถูกยุติการสอบ') color = 'bg-red-100 text-red-700';
+            return `
+            <tr class="hover:bg-sky-50">
+                <td class="px-4 py-3">${i+1}</td>
+                <td class="px-4 py-3 font-medium">${s.name}</td>
+                <td class="px-4 py-3">${s.number}</td>
+                <td class="px-4 py-3">${s.classroom}</td>
+                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${color}">${s.status}</span></td>
+                <td class="px-4 py-3"><button onclick="deleteStudent('${s.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+            </tr>`;
         }).join('');
     }
 
+    window.deleteResult = async (id) => {
+        if((await Swal.fire({title:'ลบผลสอบ?',icon:'warning',showCancelButton:true})).isConfirmed) {
+            await db.collection('results').doc(id).delete();
+            loadResults();
+        }
+    }
+
     window.deleteStudent = async (id) => {
-        if((await Swal.fire({title:'ยืนยันลบ?',icon:'warning',showCancelButton:true})).isConfirmed) {
+        if((await Swal.fire({title:'ลบผู้สอบ?',text:'จะทำให้เข้าสอบใหม่ได้',icon:'warning',showCancelButton:true})).isConfirmed) {
             await db.collection('students').doc(id).delete();
             loadStudents();
         }
+    }
+
+    function saveTimerSettings() {
+        const m = parseInt(document.getElementById('exam-time').value);
+        const e = document.getElementById('enable-timer').checked;
+        db.collection('settings').doc('timer').set({minutes: m, enabled: e});
+        Swal.fire('บันทึกสำเร็จ', '', 'success');
+    }
+
+    async function loadTimerSettingsAdmin() {
+        try {
+            const doc = await db.collection('settings').doc('timer').get();
+            if(doc.exists) {
+                document.getElementById('exam-time').value = doc.data().minutes;
+                document.getElementById('enable-timer').checked = doc.data().enabled;
+            }
+        } catch(e) {}
+    }
+
+    // Search Functions
+    window.searchResults = () => {
+        const q = document.getElementById('search-results').value.toLowerCase();
+        const filtered = allResults.filter(r => r.name.toLowerCase().includes(q) || r.number.toString().includes(q));
+        // Simple re-render partial logic not implemented for brevity, reloading all
+        // In production: Refactor renderResults to take argument.
+        // Quick fix:
+        const tbody = document.getElementById('results-tbody');
+        tbody.innerHTML = filtered.map((r, i) => `<tr class="hover:bg-sky-50"><td class="px-4 py-3">${i+1}</td><td class="px-4 py-3 font-medium">${r.name}</td><td class="px-4 py-3">${r.number}</td><td class="px-4 py-3">${r.classroom}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td><td class="px-4 py-3 text-sm">${r.duration}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td><td class="px-4 py-3"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`).join('');
     };
 
-    function exportCSV() {
-        const header = "ลำดับ,ชื่อ,เลขที่,ห้อง,คะแนน,เวลา,สถานะ\n";
-        const rows = allResults.map((r, i) => `${i+1},${r.name},${r.number},${r.classroom},${r.score},${r.duration},${r.status}`).join("\n");
-        const blob = new Blob(["\uFEFF"+header+rows], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "results.csv";
-        link.click();
-    }
+    window.searchStudents = () => {
+        const q = document.getElementById('search-students').value.toLowerCase();
+        const filtered = allStudents.filter(s => s.name.toLowerCase().includes(q) || s.number.toString().includes(q));
+        const tbody = document.getElementById('students-tbody');
+        tbody.innerHTML = filtered.map((s, i) => {
+            let color = 'bg-amber-100 text-amber-700';
+            if(s.status === 'ส่งแล้ว') color = 'bg-emerald-100 text-emerald-700';
+            if(s.status === 'ถูกยุติการสอบ') color = 'bg-red-100 text-red-700';
+            return `<tr class="hover:bg-sky-50"><td class="px-4 py-3">${i+1}</td><td class="px-4 py-3 font-medium">${s.name}</td><td class="px-4 py-3">${s.number}</td><td class="px-4 py-3">${s.classroom}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${color}">${s.status}</span></td><td class="px-4 py-3"><button onclick="deleteStudent('${s.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`;
+        }).join('');
+    };
 
   </script>
  </body>
