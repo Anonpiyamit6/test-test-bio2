@@ -434,12 +434,13 @@
         // 1. Visibility (Tab switching/Minimizing)
         document.addEventListener('visibilitychange', () => {
             if(document.hidden) triggerPenalty('ตรวจพบการพับหน้าจอ/สลับแท็บ');
-            else isAway = false;
+            // Remove 'isAway = false' from here, let the popup handle it
         });
 
         // 2. Blur (Clicking outside/Overlay tools)
         window.addEventListener('blur', () => triggerPenalty('ตรวจพบการออกนอกหน้าจอ'));
-        window.addEventListener('focus', () => isAway = false);
+        // Remove 'focus' listener that resets isAway immediately
+        // window.addEventListener('focus', () => isAway = false); 
 
         // 3. PrintScreen Key
         window.addEventListener('keyup', (e) => {
@@ -470,9 +471,10 @@
                 icon: 'warning',
                 title: `คำเตือนครั้งที่ ${warningCount}`,
                 html: `<b>${reason}</b><br>ห้ามพับหน้าจอ, เปิดแท็บอื่น หรือแคปหน้าจอ<br>หากครบ 3 ครั้ง จะถูกยุติการสอบทันที`,
-                timer: 4000,
-                timerProgressBar: true,
-                confirmButtonColor: '#f59e0b'
+                confirmButtonColor: '#f59e0b',
+                allowOutsideClick: false // Prevent closing by clicking outside
+            }).then(() => {
+                isAway = false; // Reset away status ONLY after they click OK
             });
         }
     }
