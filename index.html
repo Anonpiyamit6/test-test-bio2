@@ -87,7 +87,8 @@
             padding: 2px 8px; 
             background: white !important; 
             color: black !important;
-            font-weight: normal; 
+            font-weight: normal;
+            white-space: nowrap; /* Prevent text wrapping in print */
         }
     }
   </style>
@@ -308,7 +309,7 @@
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">ห้อง</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">คะแนน</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-32">เวลา</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">สถานะ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">สถานะ</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 no-print w-20">จัดการ</th>
            </tr>
           </thead>
@@ -1003,7 +1004,7 @@
                 <td class="px-4 py-3 border-gray-200">${r.classroom}</td>
                 <td class="px-4 py-3 border-gray-200"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td>
                 <td class="px-4 py-3 text-sm border-gray-200">${r.duration}</td>
-                <td class="px-4 py-3 border-gray-200"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td>
+                <td class="px-4 py-3 border-gray-200"><span class="px-2 py-1 rounded-full text-xs whitespace-nowrap ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td>
                 <td class="px-4 py-3 border-gray-200 no-print"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
             </tr>`).join('');
     }
@@ -1021,7 +1022,7 @@
                 <td class="px-4 py-3 font-medium">${s.name}</td>
                 <td class="px-4 py-3">${s.number}</td>
                 <td class="px-4 py-3">${s.classroom}</td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${color}">${s.status}</span></td>
+                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs whitespace-nowrap ${color}">${s.status}</span></td>
                 <td class="px-4 py-3"><button onclick="deleteStudent('${s.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
             </tr>`;
         }).join('');
@@ -1073,7 +1074,7 @@
             let color = 'bg-amber-100 text-amber-700';
             if(s.status === 'ส่งแล้ว') color = 'bg-emerald-100 text-emerald-700';
             if(s.status === 'ถูกยุติการสอบ') color = 'bg-red-100 text-red-700';
-            return `<tr class="hover:bg-sky-50"><td class="px-4 py-3">${i+1}</td><td class="px-4 py-3 font-medium">${s.name}</td><td class="px-4 py-3">${s.number}</td><td class="px-4 py-3">${s.classroom}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${color}">${s.status}</span></td><td class="px-4 py-3"><button onclick="deleteStudent('${s.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`;
+            return `<tr class="hover:bg-sky-50"><td class="px-4 py-3">${i+1}</td><td class="px-4 py-3 font-medium">${s.name}</td><td class="px-4 py-3">${s.number}</td><td class="px-4 py-3">${s.classroom}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs whitespace-nowrap ${color}">${s.status}</span></td><td class="px-4 py-3"><button onclick="deleteStudent('${s.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`;
         }).join('');
     }
 
