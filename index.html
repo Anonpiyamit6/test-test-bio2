@@ -24,9 +24,7 @@
     .card-shadow { box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15); }
     .btn-primary { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); transition: all 0.3s ease; }
     .btn-primary:hover { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
-    /* Disabled Button Style */
     .btn-disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-    
     .question-card { transition: all 0.3s ease; }
     .question-card:hover { transform: translateY(-2px); }
     .sidebar-item { transition: all 0.2s ease; cursor: pointer; }
@@ -36,17 +34,61 @@
     @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .warning-pulse { animation: pulse-warning 1s infinite; }
 
-    /* Print Styles for PDF Report */
+    /* --- PRINT STYLES (PDF REPORT) --- */
     @media print {
-        body * { visibility: hidden; }
-        #print-area, #print-area * { visibility: visible; }
-        #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; }
-        .no-print { display: none !important; }
-        .gradient-bg { background: white !important; }
-        /* Report Table Styling */
-        table { width: 100%; border-collapse: collapse; border: 1px solid black; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; color: black !important; }
-        thead { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        body { 
+            background: white !important; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important;
+        }
+        
+        /* Hide UI Elements */
+        #app > header, 
+        .sidebar-item, 
+        .btn-primary,
+        button,
+        input,
+        select,
+        .no-print,
+        #timer-display,
+        .fixed, /* Hide mobile menu */
+        #admin-page .w-64 /* Hide Sidebar */
+        { display: none !important; }
+
+        /* Reset Layout for Print */
+        #app { overflow: visible !important; height: auto !important; }
+        #admin-page { display: block !important; }
+        .flex-1.md\:ml-64 { margin-left: 0 !important; padding: 0 !important; }
+        
+        /* Specific Print Areas */
+        #print-header { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #0ea5e9; padding-bottom: 15px; }
+        #print-footer { display: flex !important; margin-top: 40px; page-break-inside: avoid; }
+        
+        /* Table Styling */
+        #results-list { box-shadow: none !important; border: none !important; }
+        table { width: 100%; border-collapse: collapse; font-size: 12pt; }
+        thead { background-color: #0ea5e9 !important; color: white !important; }
+        th { padding: 10px 8px !important; border: 1px solid #0c4a6e; text-align: center; font-weight: bold; }
+        td { padding: 8px !important; border: 1px solid #cbd5e1; color: black !important; vertical-align: middle; }
+        
+        /* Zebra Striping for readability */
+        tr:nth-child(even) { background-color: #f0f9ff !important; }
+        
+        /* Specific Column Alignments */
+        td:nth-child(1), td:nth-child(3), td:nth-child(5), td:nth-child(6), td:nth-child(7) { text-align: center; }
+        
+        /* Status Badges in Print */
+        .rounded-full { 
+            border: 1px solid #ccc; 
+            padding: 2px 8px; 
+            background: white !important; 
+            color: black !important;
+            font-weight: normal; 
+        }
     }
   </style>
  </head>
@@ -124,7 +166,6 @@
     <div id="question-container" class="bg-white rounded-2xl card-shadow p-4 md:p-6 mb-6"></div>
     
     <div class="flex justify-between mt-4 gap-4">
-        <!-- ปุ่มเดินหน้าทางเดียว -->
         <button id="next-btn" onclick="confirmNextQuestion()" class="w-full btn-primary text-white font-semibold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"> ข้อถัดไป → </button>
     </div>
     <button onclick="submitExam()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all shadow-md"> ส่งข้อสอบ </button>
@@ -243,9 +284,17 @@
        </div>
        
        <!-- Print Header (Hidden on Screen) -->
-       <div id="print-header" class="hidden text-center mb-6">
-           <h1 class="text-2xl font-bold text-black mb-2">รายงานผลคะแนนสอบ ชีววิทยา 6</h1>
-           <p class="text-gray-600" id="print-subtitle"></p>
+       <div id="print-header" class="hidden">
+           <div class="flex items-center gap-4 justify-center mb-4">
+             <div class="w-16 h-16 bg-sky-600 rounded-lg flex items-center justify-center">
+               <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+             </div>
+             <div class="text-left">
+               <h1 class="text-2xl font-bold text-sky-800">รายงานผลคะแนนสอบปลายภาค</h1>
+               <p class="text-gray-600 font-semibold">รายวิชา ชีววิทยา 6 (ว33246)</p>
+               <p class="text-sm text-gray-500" id="print-subtitle"></p>
+             </div>
+           </div>
        </div>
 
        <div id="results-list" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
@@ -253,19 +302,33 @@
          <table class="w-full">
           <thead class="bg-sky-50 border-b border-sky-100">
            <tr>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ลำดับ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-16">ลำดับ</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ชื่อ-สกุล</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เลขที่</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">ห้อง</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">คะแนน</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เวลา</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">สถานะ</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 no-print">จัดการ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-20">เลขที่</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">ห้อง</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">คะแนน</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-32">เวลา</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 w-24">สถานะ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 no-print w-20">จัดการ</th>
            </tr>
           </thead>
           <tbody id="results-tbody" class="divide-y divide-gray-100"></tbody>
          </table>
         </div>
+       </div>
+
+       <!-- Signature Footer (Hidden on Screen) -->
+       <div id="print-footer" class="hidden justify-between mt-10 pt-10 px-10">
+           <div class="text-center">
+               <div class="mb-8">ลงชื่อ......................................................</div>
+               <div>(ว่าที่ร้อยตรีอานนท์ เมืองแก้ว)</div>
+               <div class="text-sm text-gray-500 mt-1">ครูผู้สอน</div>
+           </div>
+           <div class="text-center">
+               <div class="mb-8">ลงชื่อ......................................................</div>
+               <div>(......................................................)</div>
+               <div class="text-sm text-gray-500 mt-1">หัวหน้ากลุ่มสาระฯ / วิชาการ</div>
+           </div>
        </div>
       </div>
 
