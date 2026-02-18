@@ -87,6 +87,7 @@
        <li>• ห้ามย่อหน้าจอ พับหน้าจอ หรือเปิดหน้าต่างอื่น</li>
        <li>• ห้ามแคปหน้าจอ (Print Screen)</li>
        <li>• หากทุจริตครบ 3 ครั้ง จะถูกยุติการสอบทันที</li>
+       <li class="font-bold text-red-600">• การสอบเป็นแบบเดินหน้าทางเดียว ไม่สามารถย้อนกลับมาแก้ข้อเดิมได้</li>
       </ul>
      </div>
     </div>
@@ -110,8 +111,8 @@
     <div id="question-container" class="bg-white rounded-2xl card-shadow p-4 md:p-6 mb-6"></div>
     
     <div class="flex justify-between mt-4 gap-4">
-        <button onclick="prevQuestion()" class="flex-1 bg-white border-2 border-sky-400 text-sky-600 font-semibold py-3 rounded-xl hover:bg-sky-50 transition-all shadow-sm"> ← ข้อก่อนหน้า </button> 
-        <button id="next-btn" onclick="nextQuestion()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"> ข้อถัดไป → </button>
+        <!-- แก้ไข: ลบปุ่มข้อก่อนหน้า และปรับปุ่มข้อถัดไปให้เรียกใช้ฟังก์ชัน confirmNextQuestion -->
+        <button id="next-btn" onclick="confirmNextQuestion()" class="w-full btn-primary text-white font-semibold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"> ข้อถัดไป → </button>
     </div>
     <button onclick="submitExam()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all shadow-md"> ส่งข้อสอบ </button>
    </div>
@@ -515,25 +516,24 @@
     }
 
     // --------------------------------------------------------
-    // Render & Navigation
+    // Render & Navigation (MODIFIED FOR ONE-WAY EXAM)
     // --------------------------------------------------------
     function renderQuestionNav() {
         const nav = document.getElementById('question-nav');
         nav.innerHTML = questions.map((q, i) => {
-            // Logic to prevent jumping ahead: Only allow visited or current. 
-            // Strict rule: "Answer this before doing next" means we can't click FUTURE questions.
-            // But we can go back.
-            const isFuture = i > currentQuestionIndex && studentAnswers[questions[currentQuestionIndex].id] === undefined;
-            const disabledClass = (i > currentQuestionIndex) ? 'opacity-50 cursor-not-allowed pointer-events-none' : '';
+            // Logic: Determine styles but REMOVE click capability
+            let styles = "w-8 h-8 rounded-lg text-sm font-medium transition-all flex items-center justify-center cursor-default ";
             
-            return `
-            <button onclick="${i > currentQuestionIndex ? '' : `goToQuestion(${i})`}" 
-                class="w-8 h-8 rounded-lg text-sm font-medium transition-all ${disabledClass} 
-                ${i === currentQuestionIndex ? 'bg-sky-500 text-white shadow-md' : 
-                  studentAnswers[q.id] !== undefined ? 'bg-emerald-500 text-white' : 'bg-white border border-sky-200 text-sky-600 hover:bg-sky-50'}">
-                ${i + 1}
-            </button>
-        `}).join('');
+            if (i === currentQuestionIndex) {
+                styles += "bg-sky-500 text-white shadow-md"; // ปัจจุบัน
+            } else if (i < currentQuestionIndex) {
+                styles += "bg-gray-200 text-gray-400"; // ผ่านไปแล้ว (สีจาง)
+            } else {
+                styles += "bg-white border border-sky-200 text-sky-600 opacity-50"; // อนาคต
+            }
+            
+            return `<div class="${styles}">${i + 1}</div>`;
+        }).join('');
     }
 
     function renderQuestion() {
@@ -556,6 +556,14 @@
         document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
         renderQuestionNav();
         updateNextButtonState();
+
+        // ซ่อนปุ่มข้อถัดไปถ้าเป็นข้อสุดท้าย
+        const nextBtn = document.getElementById('next-btn');
+        if (currentQuestionIndex === questions.length - 1) {
+            nextBtn.style.display = 'none';
+        } else {
+            nextBtn.style.display = 'block';
+        }
     }
 
     function selectAnswer(i) {
@@ -577,12 +585,27 @@
         }
     }
 
-    function goToQuestion(i) { currentQuestionIndex = i; renderQuestion(); }
-    function prevQuestion() { if(currentQuestionIndex > 0) goToQuestion(currentQuestionIndex - 1); }
-    
-    function nextQuestion() { 
-        if(studentAnswers[questions[currentQuestionIndex].id] === undefined) return; // Prevent if not answered
-        if(currentQuestionIndex < questions.length - 1) goToQuestion(currentQuestionIndex + 1); 
+    // New Function: Confirm before next question
+    function confirmNextQuestion() {
+        if(studentAnswers[questions[currentQuestionIndex].id] === undefined) return;
+
+        Swal.fire({
+            title: 'ยืนยันคำตอบ?',
+            text: "เมื่อผ่านข้อนี้ไปแล้ว จะไม่สามารถย้อนกลับมาแก้ไขได้อีก",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0ea5e9',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยันและไปต่อ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            }
+        });
     }
 
     function submitExam() {
