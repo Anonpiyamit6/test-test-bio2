@@ -35,13 +35,26 @@
     .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .warning-pulse { animation: pulse-warning 1s infinite; }
+
+    /* Print Styles for PDF Report */
+    @media print {
+        body * { visibility: hidden; }
+        #print-area, #print-area * { visibility: visible; }
+        #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; }
+        .no-print { display: none !important; }
+        .gradient-bg { background: white !important; }
+        /* Report Table Styling */
+        table { width: 100%; border-collapse: collapse; border: 1px solid black; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; color: black !important; }
+        thead { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+    }
   </style>
  </head>
  <body class="h-full gradient-bg no-select">
   <div id="app" class="h-full overflow-auto">
    
    <!-- Header -->
-   <header class="bg-white/90 backdrop-blur-sm shadow-md sticky top-0 z-50">
+   <header class="bg-white/90 backdrop-blur-sm shadow-md sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
      <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl flex items-center justify-center shadow-sm">
@@ -137,7 +150,7 @@
    <div id="admin-page" class="hidden">
     <div class="flex h-full">
      <!-- Sidebar -->
-     <div class="w-64 bg-white shadow-xl fixed h-full overflow-y-auto hidden md:block z-20">
+     <div class="w-64 bg-white shadow-xl fixed h-full overflow-y-auto hidden md:block z-20 no-print">
       <div class="p-6 border-b bg-sky-50">
        <h3 class="font-bold text-sky-800 text-lg">แอดมินระบบ</h3>
        <p id="admin-email-display" class="text-sm text-gray-500 truncate"></p>
@@ -169,7 +182,7 @@
      </div>
      
      <!-- Mobile Menu -->
-     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 border-t">
+     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 border-t no-print">
       <div class="flex justify-around py-2">
         <button onclick="showAdminTab('questions')" class="flex flex-col items-center p-2 text-sky-600" data-tab-mobile="questions"><span class="text-xs font-medium">ข้อสอบ</span></button> 
         <button onclick="showAdminTab('results')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="results"><span class="text-xs font-medium">ผลสอบ</span></button> 
@@ -196,16 +209,47 @@
 
       <!-- Results Tab -->
       <div id="admin-results" class="admin-content hidden">
-       <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+       <div class="flex flex-wrap justify-between items-center gap-4 mb-6 no-print">
         <h2 class="text-2xl font-bold text-sky-800">ผลการสอบ</h2>
         <div class="flex gap-2">
-            <button onclick="refreshResults()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all border border-sky-200">รีเฟรช</button> 
-            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-sm">Export CSV</button>
+            <button onclick="refreshResults()" class="bg-sky-100 text-sky-600 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-sky-200 transition-all border border-sky-200">รีเฟรช</button>
+            <button onclick="exportExcel()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Excel
+            </button>
+            <button onclick="printReport()" class="bg-gray-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-gray-700 transition-all shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                พิมพ์ / PDF
+            </button>
         </div>
        </div>
-       <div class="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"><input type="text" id="search-results" oninput="searchResults()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all"></div>
+
+       <!-- Filters Row -->
+       <div class="flex gap-4 mb-4 flex-wrap no-print">
+         <div class="flex-1 min-w-[200px]">
+           <input type="text" id="search-results" oninput="filterResults()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all">
+         </div>
+         <div class="w-full md:w-48">
+           <select id="filter-classroom" onchange="filterResults()" class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all">
+             <option value="">ทุกห้อง</option>
+             <option value="ม.6/6">ม.6/6</option>
+             <option value="ม.6/7">ม.6/7</option>
+             <option value="ม.6/8">ม.6/8</option>
+             <option value="ม.6/9">ม.6/9</option>
+             <option value="ม.6/10">ม.6/10</option>
+             <option value="ม.6/11">ม.6/11</option>
+           </select>
+         </div>
+       </div>
+       
+       <!-- Print Header (Hidden on Screen) -->
+       <div id="print-header" class="hidden text-center mb-6">
+           <h1 class="text-2xl font-bold text-black mb-2">รายงานผลคะแนนสอบ ชีววิทยา 6</h1>
+           <p class="text-gray-600" id="print-subtitle"></p>
+       </div>
+
        <div id="results-list" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto" id="print-area">
          <table class="w-full">
           <thead class="bg-sky-50 border-b border-sky-100">
            <tr>
@@ -216,7 +260,7 @@
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">คะแนน</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">เวลา</th>
             <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">สถานะ</th>
-            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800">จัดการ</th>
+            <th class="px-4 py-3 text-left text-sm font-bold text-sky-800 no-print">จัดการ</th>
            </tr>
           </thead>
           <tbody id="results-tbody" class="divide-y divide-gray-100"></tbody>
@@ -312,6 +356,9 @@
     let allStudents = [];
     let isAway = false;
     let lastCheatTime = 0;
+    
+    // Cache for filtering
+    let filteredResults = [];
 
     // --------------------------------------------------------
     // Core Functions
@@ -862,20 +909,39 @@
         });
     }
 
-    // Load Data
+    // --------------------------------------------------------------------------------
+    // Results Management (Updated for Filtering and Exporting)
+    // --------------------------------------------------------------------------------
     async function loadResults() {
         const snap = await db.collection('results').orderBy('submittedAt', 'desc').get();
         allResults = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        document.getElementById('results-tbody').innerHTML = allResults.map((r, i) => `
+        filterResults(); // Initial render
+    }
+
+    function filterResults() {
+        const searchText = document.getElementById('search-results').value.toLowerCase();
+        const classFilter = document.getElementById('filter-classroom').value;
+
+        filteredResults = allResults.filter(r => {
+            const matchesText = r.name.toLowerCase().includes(searchText) || r.number.toString().includes(searchText);
+            const matchesClass = classFilter === "" || r.classroom === classFilter;
+            return matchesText && matchesClass;
+        });
+
+        renderResultsTable(filteredResults);
+    }
+
+    function renderResultsTable(data) {
+        document.getElementById('results-tbody').innerHTML = data.map((r, i) => `
             <tr class="hover:bg-sky-50">
-                <td class="px-4 py-3">${i+1}</td>
-                <td class="px-4 py-3 font-medium">${r.name}</td>
-                <td class="px-4 py-3">${r.number}</td>
-                <td class="px-4 py-3">${r.classroom}</td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td>
-                <td class="px-4 py-3 text-sm">${r.duration}</td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td>
-                <td class="px-4 py-3"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+                <td class="px-4 py-3 border-gray-200">${i+1}</td>
+                <td class="px-4 py-3 font-medium border-gray-200">${r.name}</td>
+                <td class="px-4 py-3 border-gray-200">${r.number}</td>
+                <td class="px-4 py-3 border-gray-200">${r.classroom}</td>
+                <td class="px-4 py-3 border-gray-200"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td>
+                <td class="px-4 py-3 text-sm border-gray-200">${r.duration}</td>
+                <td class="px-4 py-3 border-gray-200"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td>
+                <td class="px-4 py-3 border-gray-200 no-print"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
             </tr>`).join('');
     }
 
@@ -933,12 +999,8 @@
         } catch(e) {}
     }
 
-    function searchResults() {
-        const q = document.getElementById('search-results').value.toLowerCase();
-        const filtered = allResults.filter(r => r.name.toLowerCase().includes(q) || r.number.toString().includes(q));
-        const tbody = document.getElementById('results-tbody');
-        tbody.innerHTML = filtered.map((r, i) => `<tr class="hover:bg-sky-50"><td class="px-4 py-3">${i+1}</td><td class="px-4 py-3 font-medium">${r.name}</td><td class="px-4 py-3">${r.number}</td><td class="px-4 py-3">${r.classroom}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${r.score >= r.totalQuestions/2 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${r.score}/${r.totalQuestions}</span></td><td class="px-4 py-3 text-sm">${r.duration}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.cheated ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span></td><td class="px-4 py-3"><button onclick="deleteResult('${r.id}')" class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`).join('');
-    }
+    // Old Search function replaced by filterResults
+    function searchResults() { filterResults(); }
 
     function searchStudents() {
         const q = document.getElementById('search-students').value.toLowerCase();
@@ -962,15 +1024,38 @@
         Swal.fire({ icon: 'success', title: 'รีเฟรชสำเร็จ', timer: 1000, showConfirmButton: false });
     }
 
-    function exportCSV() {
-        if(allResults.length === 0) return Swal.fire('ไม่มีข้อมูล', '', 'info');
-        const header = "ลำดับ,ชื่อ-สกุล,เลขที่,ห้อง,คะแนน,คะแนนเต็ม,เวลาที่ใช้,สถานะ,จำนวนครั้งที่เตือน\n";
-        const rows = allResults.map((r, i) => `${i+1},${r.name},${r.number},${r.classroom},${r.score},${r.totalQuestions},${r.duration},${r.status},${r.warnings}`).join("\n");
-        const blob = new Blob(["\uFEFF"+header+rows], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `results_${new Date().toLocaleDateString('th-TH')}.csv`;
-        link.click();
+    function exportExcel() {
+        if(filteredResults.length === 0) return Swal.fire('ไม่มีข้อมูล', 'กรุณาเลือกช่วงข้อมูลที่มีผลสอบ', 'info');
+        
+        // Transform data for Excel
+        const excelData = filteredResults.map((r, i) => ({
+            'ลำดับ': i + 1,
+            'ชื่อ-สกุล': r.name,
+            'เลขที่': parseInt(r.number), // Ensure number format
+            'ห้อง': r.classroom,
+            'คะแนนที่ได้': r.score,
+            'คะแนนเต็ม': r.totalQuestions,
+            'เวลาที่ใช้': r.duration,
+            'สถานะ': r.status,
+            'เตือนทุจริต(ครั้ง)': r.warnings
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        XLSX.utils.book_append_sheet(wb, ws, "Results");
+        
+        // Generate filename with timestamp and class filter
+        const classStr = document.getElementById('filter-classroom').value || 'All';
+        XLSX.writeFile(wb, `Score_Bio6_${classStr}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function printReport() {
+        const classFilter = document.getElementById('filter-classroom').value;
+        const subtitle = classFilter ? `ห้อง: ${classFilter}` : 'รายงานรวมทุกห้องเรียน';
+        document.getElementById('print-subtitle').textContent = subtitle + ` (ข้อมูล ณ วันที่ ${new Date().toLocaleDateString('th-TH')})`;
+        
+        // Trigger Print (User can choose "Save as PDF" in the browser print dialog)
+        window.print();
     }
 
     // Init
