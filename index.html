@@ -224,7 +224,7 @@
      </div>
      
      <!-- Mobile Menu -->
-     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 border-t no-print">
+     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow- z-50 border-t no-print">
       <div class="flex justify-around py-2">
         <button onclick="showAdminTab('questions')" class="flex flex-col items-center p-2 text-sky-600" data-tab-mobile="questions"><span class="text-xs font-medium">ข้อสอบ</span></button> 
         <button onclick="showAdminTab('results')" class="flex flex-col items-center p-2 text-gray-500" data-tab-mobile="results"><span class="text-xs font-medium">ผลสอบ</span></button> 
@@ -268,7 +268,7 @@
 
        <!-- Filters Row -->
        <div class="flex gap-4 mb-4 flex-wrap no-print">
-         <div class="flex-1 min-w-[200px]">
+         <div class="flex-1 min-w-">
            <input type="text" id="search-results" oninput="filterResults()" placeholder="ค้นหาชื่อหรือเลขที่..." class="w-full px-4 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 outline-none transition-all">
          </div>
          <div class="w-full md:w-48">
@@ -406,7 +406,7 @@
     // --------------------------------------------------------
     let currentUser = null;
     let isAdmin = false;
-    let questions = [];
+    let questions =[];
     let currentQuestionIndex = 0;
     let studentAnswers = {};
     let studentInfo = { name: '', number: '', classroom: '' };
@@ -417,12 +417,12 @@
     let examStartTime = null;
     let timerSettings = { enabled: false, minutes: 60 };
     let allResults = [];
-    let allStudents = [];
+    let allStudents =[];
     let isAway = false;
     let lastCheatTime = 0;
     
     // Cache for filtering
-    let filteredResults = [];
+    let filteredResults =[];
 
     // --------------------------------------------------------
     // Core Functions
@@ -438,22 +438,21 @@
     // ฟังก์ชันสำหรับสลับลำดับข้อสอบ (Shuffle)
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            const j = Math.floor(Math.random() * (i + 1));, array] =, array];
         }
         return array;
     }
 
     function generateDefaultQuestions() {
-        const topics = [
-            { q: 'ระบบนิเวศคืออะไร', choices: ['ความสัมพันธ์สิ่งมีชีวิตกับสิ่งแวดล้อม', 'กลุ่มสิ่งมีชีวิต', 'ป่าไม้', 'สัตว์ป่า'], answer: 0 },
-            { q: 'ผู้ผลิตในระบบนิเวศคือใคร', choices: ['พืช', 'สัตว์กินพืช', 'สัตว์กินเนื้อ', 'เห็ดรา'], answer: 0 },
-            { q: 'การสังเคราะห์แสงได้แก๊สอะไร', choices: ['ออกซิเจน', 'คาร์บอนไดออกไซด์', 'ไนโตรเจน', 'มีเทน'], answer: 0 }
+        const topics =[
+            { q: 'ระบบนิเวศคืออะไร', choices:, answer: 0 },
+            { q: 'ผู้ผลิตในระบบนิเวศคือใคร', choices:, answer: 0 },
+            { q: 'การสังเคราะห์แสงได้แก๊สอะไร', choices:, answer: 0 }
         ];
-        let fullList = [];
+        let fullList =[];
         for(let i=0; i<40; i++) {
-            if(i < topics.length) fullList.push(topics[i]);
-            else fullList.push({ q: `ข้อสอบตัวอย่างข้อที่ ${i+1}`, choices: ['ตัวเลือก 1', 'ตัวเลือก 2', 'ตัวเลือก 3', 'ตัวเลือก 4'], answer: 0 });
+            if(i < topics.length) fullList.push(topics);
+            else fullList.push({ q: `ข้อสอบตัวอย่างข้อที่ ${i+1}`, choices:, answer: 0 });
         }
         return fullList.map((t, i) => ({
             id: `q${i + 1}`,
@@ -545,6 +544,14 @@
         
         // สุ่มลำดับข้อสอบก่อนเริ่ม
         questions = shuffleArray(questions);
+        
+        // --- ส่วนที่สุ่มข้อสอบ 30 ข้อ ---
+        const maxQuestions = 30; // จำนวนข้อที่ต้องการให้สุ่มทำ
+        if (questions.length > maxQuestions) {
+            questions = questions.slice(0, maxQuestions);
+        }
+        document.getElementById('total-questions-display').textContent = questions.length;
+        // -------------------------------
 
         examStartTime = Date.now();
         loadTimerSettings();
@@ -678,11 +685,11 @@
     }
 
     function renderQuestion() {
-        const q = questions[currentQuestionIndex];
+        const q = questions;
         if(!q) return;
 
         // ตัดเลขข้อเก่าออกจากโจทย์ (เช่น "5. โจทย์" เหลือ "โจทย์") เพื่อใส่เลขใหม่ตามลำดับการสุ่ม
-        const cleanQuestion = q.question.replace(/^\d+[\.\: ]+\s*/, '');
+        const cleanQuestion = q.question.replace(/^\d++\s*/, '');
 
         const container = document.getElementById('question-container');
         container.innerHTML = `
@@ -690,8 +697,8 @@
                 <h3 class="text-lg font-semibold text-gray-800 mb-6">${currentQuestionIndex + 1}. ${cleanQuestion}</h3>
                 <div class="space-y-3">
                     ${q.choices.map((c, i) => `
-                        <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${studentAnswers[q.id] === i ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-200' : 'border-gray-200 hover:border-sky-300'}">
-                            <input type="radio" name="answer" value="${i}" ${studentAnswers[q.id] === i ? 'checked' : ''} onchange="selectAnswer(${i})" class="w-5 h-5 text-sky-600 focus:ring-sky-500">
+                        <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${studentAnswers === i ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-200' : 'border-gray-200 hover:border-sky-300'}">
+                            <input type="radio" name="answer" value="${i}" ${studentAnswers === i ? 'checked' : ''} onchange="selectAnswer(${i})" class="w-5 h-5 text-sky-600 focus:ring-sky-500">
                             <span class="ml-3 text-gray-700"><span class="font-bold mr-1">${i+1}.</span> ${c}</span>
                         </label>
                     `).join('')}
@@ -712,14 +719,14 @@
     }
 
     function selectAnswer(i) {
-        studentAnswers[questions[currentQuestionIndex].id] = i;
+        studentAnswers[questions.id] = i;
         renderQuestionNav();
         updateNextButtonState();
     }
 
     function updateNextButtonState() {
         const btn = document.getElementById('next-btn');
-        if(studentAnswers[questions[currentQuestionIndex].id] === undefined) {
+        if(studentAnswers.id] === undefined) {
             btn.classList.add('btn-disabled');
             btn.classList.remove('btn-primary', 'hover:shadow-lg');
             btn.disabled = true;
@@ -732,7 +739,7 @@
 
     // New Function: Confirm before next question
     function confirmNextQuestion() {
-        if(studentAnswers[questions[currentQuestionIndex].id] === undefined) return;
+        if(studentAnswers.id] === undefined) return;
 
         Swal.fire({
             title: 'ยืนยันคำตอบ?',
@@ -772,7 +779,7 @@
     async function submitExamData(cheated = false) {
         clearInterval(examTimer);
         let score = 0;
-        questions.forEach(q => { if(studentAnswers[q.id] === q.correctAnswer) score++; });
+        questions.forEach(q => { if(studentAnswers === q.correctAnswer) score++; });
         
         const duration = Math.floor((Date.now() - examStartTime) / 1000);
         const durationStr = `${Math.floor(duration/60)} นาที ${duration%60} วินาที`;
@@ -845,7 +852,7 @@
             el.classList.remove('active');
             if(el.dataset.tab === tab) el.classList.add('active');
         });
-        document.querySelectorAll('[data-tab-mobile]').forEach(el => {
+        document.querySelectorAll('').forEach(el => {
             el.classList.remove('text-sky-600');
             el.classList.add('text-gray-500');
             if(el.dataset.tabMobile === tab) { el.classList.add('text-sky-600'); el.classList.remove('text-gray-500'); }
@@ -914,7 +921,7 @@
             showCancelButton: true,
             confirmButtonText: 'บันทึก',
             confirmButtonColor: '#0ea5e9',
-            preConfirm: () => ({ q: document.getElementById('nq').value, choices: [document.getElementById('c1').value, document.getElementById('c2').value, document.getElementById('c3').value, document.getElementById('c4').value], a: parseInt(document.getElementById('ca').value) })
+            preConfirm: () => ({ q: document.getElementById('nq').value, choices:, a: parseInt(document.getElementById('ca').value) })
         }).then(async (res) => {
             if(res.isConfirmed) {
                 await db.collection('questions').add({ order: questions.length+1, question: res.value.q, choices: res.value.choices, correctAnswer: res.value.a });
@@ -932,10 +939,10 @@
             title: 'แก้ไขข้อสอบ',
             html: `<div class="text-left space-y-3">
                    <input id="nq" class="w-full px-3 py-2 border rounded-lg" value="${q.question.replace(/^\d+\.\s*/,'')}">
-                   <input id="c1" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[0]}">
-                   <input id="c2" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[1]}">
-                   <input id="c3" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[2]}">
-                   <input id="c4" class="w-full px-3 py-2 border rounded-lg" value="${q.choices[3]}">
+                   <input id="c1" class="w-full px-3 py-2 border rounded-lg" value="${q.choices}">
+                   <input id="c2" class="w-full px-3 py-2 border rounded-lg" value="${q.choices}">
+                   <input id="c3" class="w-full px-3 py-2 border rounded-lg" value="${q.choices}">
+                   <input id="c4" class="w-full px-3 py-2 border rounded-lg" value="${q.choices}">
                    <select id="ca" class="w-full px-3 py-2 border rounded-lg">
                     <option value="0" ${q.correctAnswer==0?'selected':''}>1</option>
                     <option value="1" ${q.correctAnswer==1?'selected':''}>2</option>
@@ -945,7 +952,7 @@
             showCancelButton: true,
             confirmButtonText: 'บันทึก',
             confirmButtonColor: '#0ea5e9',
-            preConfirm: () => ({ q: document.getElementById('nq').value, choices: [document.getElementById('c1').value, document.getElementById('c2').value, document.getElementById('c3').value, document.getElementById('c4').value], a: parseInt(document.getElementById('ca').value) })
+            preConfirm: () => ({ q: document.getElementById('nq').value, choices:, a: parseInt(document.getElementById('ca').value) })
         }).then(async (res) => {
             if(res.isConfirmed) {
                 await db.collection('questions').doc(id).update({ question: `${q.order}. ${res.value.q}`, choices: res.value.choices, correctAnswer: res.value.a });
@@ -962,13 +969,13 @@
             showCancelButton: true,
             confirmButtonText: 'นำเข้า',
             confirmButtonColor: '#0ea5e9',
-            preConfirm: () => document.getElementById('xls').files[0]
+            preConfirm: () => document.getElementById('xls').files
         }).then((res) => {
             if(res.isConfirmed && res.value) {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     const wb = XLSX.read(e.target.result, {type:'binary'});
-                    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:'A'});
+                    const data = XLSX.utils.sheet_to_json(wb.Sheets], {header:'A'});
                     if((await Swal.fire({title:'ยืนยัน?',text:'ข้อสอบเก่าจะถูกลบทั้งหมด',icon:'warning',showCancelButton:true})).isConfirmed) {
                         const batch = db.batch();
                         questions.forEach(q => batch.delete(db.collection('questions').doc(q.id)));
@@ -976,7 +983,7 @@
                         let idx = 1;
                         data.forEach(r => {
                             if(r.A && r.B && r.C && r.D && r.E && r.F!==undefined) {
-                                newBatch.set(db.collection('questions').doc(`q${idx}`), { order: idx++, question: r.A, choices: [r.B, r.C, r.D, r.E], correctAnswer: parseInt(r.F) });
+                                newBatch.set(db.collection('questions').doc(`q${idx}`), { order: idx++, question: r.A, choices:, correctAnswer: parseInt(r.F) });
                             }
                         });
                         await batch.commit(); await newBatch.commit();
