@@ -288,7 +288,7 @@
        <div id="print-header" class="hidden">
            <div class="flex items-center gap-4 justify-center mb-4">
              <div class="w-16 h-16 bg-sky-600 rounded-lg flex items-center justify-center">
-               <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+               <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
              </div>
              <div class="text-left">
                <h1 class="text-2xl font-bold text-sky-800">รายงานผลคะแนนสอบปลายภาค</h1>
@@ -416,7 +416,7 @@
     let examTimeLeft = 0;
     let examStartTime = null;
     let timerSettings = { enabled: false, minutes: 60 };
-    let allResults = [];
+    let allResults =[];
     let allStudents =[];
     let isAway = false;
     let lastCheatTime = 0;
@@ -444,7 +444,7 @@
     }
 
     function generateDefaultQuestions() {
-        const topics = [
+        const topics =[
             { q: 'ระบบนิเวศคืออะไร', choices:, answer: 0 },
             { q: 'ผู้ผลิตในระบบนิเวศคือใคร', choices:, answer: 0 },
             { q: 'การสังเคราะห์แสงได้แก๊สอะไร', choices:, answer: 0 }
@@ -542,17 +542,14 @@
         document.getElementById('timer-display').classList.remove('hidden');
         document.getElementById('student-info-display').textContent = `${studentInfo.name} (เลขที่ ${studentInfo.number})`;
         
-        // 1. สลับลำดับข้อสอบก่อนเริ่ม (Shuffle)
+        // --- ส่วนที่สุ่มและหั่นให้เหลือ 30 ข้อ ---
         questions = shuffleArray(questions);
-
-        // 2. จำกัดให้เหลือแค่ 30 ข้อ (หรือตามต้องการ)
-        const maxQuestions = 30;
+        const maxQuestions = 30; // ตัดเหลือแค่ 30 ข้อ
         if (questions.length > maxQuestions) {
             questions = questions.slice(0, maxQuestions);
         }
-
-        // 3. อัปเดตตัวเลขจำนวนข้อสอบให้แสดง 30 ในหน้าจอ UI
         document.getElementById('total-questions-display').textContent = questions.length;
+        // --------------------------------
 
         examStartTime = Date.now();
         loadTimerSettings();
@@ -727,7 +724,7 @@
 
     function updateNextButtonState() {
         const btn = document.getElementById('next-btn');
-        if(studentAnswers.id] === undefined) {
+        if(studentAnswers[questions.id] === undefined) {
             btn.classList.add('btn-disabled');
             btn.classList.remove('btn-primary', 'hover:shadow-lg');
             btn.disabled = true;
@@ -1146,10 +1143,8 @@
         window.print();
     }
 
-    // Init
-    if (typeof applyConfig === 'function') {
-        applyConfig();
-    }
+    // Commented out to prevent ReferenceError since applyConfig is not defined in the code
+    // applyConfig();
   </script>
  </body>
 </html>
