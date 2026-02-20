@@ -542,16 +542,16 @@
         document.getElementById('timer-display').classList.remove('hidden');
         document.getElementById('student-info-display').textContent = `${studentInfo.name} (เลขที่ ${studentInfo.number})`;
         
-        // สุ่มลำดับข้อสอบก่อนเริ่ม
+        // สุ่มลำดับข้อสอบก่อนเริ่ม (ทุกคนจะได้ลำดับข้อไม่เหมือนกัน)
         questions = shuffleArray(questions);
-        
-        // --- ส่วนที่สุ่มข้อสอบ 30 ข้อ ---
-        const maxQuestions = 30; // จำนวนข้อที่ต้องการให้สุ่มทำ
+
+        // --- ตัดสุ่มเอาแค่ 30 ข้อ ---
+        const maxQuestions = 30; // ระบุจำนวนข้อที่ต้องการให้สอบตรงนี้
         if (questions.length > maxQuestions) {
             questions = questions.slice(0, maxQuestions);
         }
         document.getElementById('total-questions-display').textContent = questions.length;
-        // -------------------------------
+        // -----------------------
 
         examStartTime = Date.now();
         loadTimerSettings();
@@ -719,7 +719,7 @@
     }
 
     function selectAnswer(i) {
-        studentAnswers[questions.id] = i;
+        studentAnswers.id] = i;
         renderQuestionNav();
         updateNextButtonState();
     }
@@ -1146,7 +1146,9 @@
     }
 
     // Init
-    applyConfig();
+    if (typeof applyConfig === 'function') {
+        applyConfig();
+    }
   </script>
  </body>
 </html>
