@@ -416,7 +416,7 @@
     let examTimeLeft = 0;
     let examStartTime = null;
     let timerSettings = { enabled: false, minutes: 60 };
-    let allResults =[];
+    let allResults = [];
     let allStudents =[];
     let isAway = false;
     let lastCheatTime = 0;
@@ -438,7 +438,8 @@
     // ฟังก์ชันสำหรับสลับลำดับข้อสอบ (Shuffle)
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));, array] =, array];
+            const j = Math.floor(Math.random() * (i + 1));
+            [array, array] =, array];
         }
         return array;
     }
@@ -566,13 +567,10 @@
         // 1. Visibility (Tab switching/Minimizing)
         document.addEventListener('visibilitychange', () => {
             if(document.hidden) triggerPenalty('ตรวจพบการพับหน้าจอ/สลับแท็บ');
-            // Remove 'isAway = false' from here, let the popup handle it
         });
 
         // 2. Blur (Clicking outside/Overlay tools)
         window.addEventListener('blur', () => triggerPenalty('ตรวจพบการออกนอกหน้าจอ'));
-        // Remove 'focus' listener that resets isAway immediately
-        // window.addEventListener('focus', () => isAway = false); 
 
         // 3. PrintScreen Key
         window.addEventListener('keyup', (e) => {
@@ -687,7 +685,7 @@
         if(!q) return;
 
         // ตัดเลขข้อเก่าออกจากโจทย์ (เช่น "5. โจทย์" เหลือ "โจทย์") เพื่อใส่เลขใหม่ตามลำดับการสุ่ม
-        const cleanQuestion = q.question.replace(/^\d++\s*/, '');
+        const cleanQuestion = q.question.replace(/^\d+\.?\s*/, '');
 
         const container = document.getElementById('question-container');
         container.innerHTML = `
@@ -724,7 +722,7 @@
 
     function updateNextButtonState() {
         const btn = document.getElementById('next-btn');
-        if(studentAnswers[questions.id] === undefined) {
+        if(studentAnswers.id] === undefined) {
             btn.classList.add('btn-disabled');
             btn.classList.remove('btn-primary', 'hover:shadow-lg');
             btn.disabled = true;
@@ -919,7 +917,11 @@
             showCancelButton: true,
             confirmButtonText: 'บันทึก',
             confirmButtonColor: '#0ea5e9',
-            preConfirm: () => ({ q: document.getElementById('nq').value, choices:, a: parseInt(document.getElementById('ca').value) })
+            preConfirm: () => ({ 
+                q: document.getElementById('nq').value, 
+                choices:, 
+                a: parseInt(document.getElementById('ca').value) 
+            })
         }).then(async (res) => {
             if(res.isConfirmed) {
                 await db.collection('questions').add({ order: questions.length+1, question: res.value.q, choices: res.value.choices, correctAnswer: res.value.a });
@@ -950,7 +952,11 @@
             showCancelButton: true,
             confirmButtonText: 'บันทึก',
             confirmButtonColor: '#0ea5e9',
-            preConfirm: () => ({ q: document.getElementById('nq').value, choices:, a: parseInt(document.getElementById('ca').value) })
+            preConfirm: () => ({ 
+                q: document.getElementById('nq').value, 
+                choices:, 
+                a: parseInt(document.getElementById('ca').value) 
+            })
         }).then(async (res) => {
             if(res.isConfirmed) {
                 await db.collection('questions').doc(id).update({ question: `${q.order}. ${res.value.q}`, choices: res.value.choices, correctAnswer: res.value.a });
@@ -981,7 +987,12 @@
                         let idx = 1;
                         data.forEach(r => {
                             if(r.A && r.B && r.C && r.D && r.E && r.F!==undefined) {
-                                newBatch.set(db.collection('questions').doc(`q${idx}`), { order: idx++, question: r.A, choices:, correctAnswer: parseInt(r.F) });
+                                newBatch.set(db.collection('questions').doc(`q${idx}`), { 
+                                    order: idx++, 
+                                    question: r.A, 
+                                    choices:, 
+                                    correctAnswer: parseInt(r.F) 
+                                });
                             }
                         });
                         await batch.commit(); await newBatch.commit();
@@ -1084,7 +1095,6 @@
         } catch(e) {}
     }
 
-    // Old Search function replaced by filterResults
     function searchResults() { filterResults(); }
 
     function searchStudents() {
@@ -1139,12 +1149,8 @@
         const subtitle = classFilter ? `ห้อง: ${classFilter}` : 'รายงานรวมทุกห้องเรียน';
         document.getElementById('print-subtitle').textContent = subtitle + ` (ข้อมูล ณ วันที่ ${new Date().toLocaleDateString('th-TH')})`;
         
-        // Trigger Print (User can choose "Save as PDF" in the browser print dialog)
         window.print();
     }
-
-    // Commented out to prevent ReferenceError since applyConfig is not defined in the code
-    // applyConfig();
   </script>
  </body>
 </html>
