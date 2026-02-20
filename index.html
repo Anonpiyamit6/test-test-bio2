@@ -438,7 +438,8 @@
     // ฟังก์ชันสำหรับสลับลำดับข้อสอบ (Shuffle)
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));, array] =, array];
+            const j = Math.floor(Math.random() * (i + 1));
+            [array, array] =, array];
         }
         return array;
     }
@@ -542,16 +543,17 @@
         document.getElementById('timer-display').classList.remove('hidden');
         document.getElementById('student-info-display').textContent = `${studentInfo.name} (เลขที่ ${studentInfo.number})`;
         
-        // สุ่มลำดับข้อสอบก่อนเริ่ม (ทุกคนจะได้ลำดับข้อไม่เหมือนกัน)
+        // --- 1. สลับลำดับข้อสอบแบบสุ่ม ---
         questions = shuffleArray(questions);
 
-        // --- ตัดสุ่มเอาแค่ 30 ข้อ ---
-        const maxQuestions = 30; // ระบุจำนวนข้อที่ต้องการให้สอบตรงนี้
+        // --- 2. ตัดข้อสอบให้เหลือแค่ 30 ข้อ (หรือตามจำนวนที่ต้องการ) ---
+        const maxQuestions = 30;
         if (questions.length > maxQuestions) {
             questions = questions.slice(0, maxQuestions);
         }
+
+        // --- 3. อัปเดตการแสดงผลจำนวนข้อสอบ ---
         document.getElementById('total-questions-display').textContent = questions.length;
-        // -----------------------
 
         examStartTime = Date.now();
         loadTimerSettings();
@@ -1146,7 +1148,7 @@
     }
 
     // Init
-    if (typeof applyConfig === 'function') {
+    if(typeof applyConfig === 'function') {
         applyConfig();
     }
   </script>
